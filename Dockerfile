@@ -1,7 +1,8 @@
-FROM mikesplain/openvas
+FROM thedoctor0/openvas-docker-lite
 
 FROM ubuntu:18.04
 
+# Copy existing feeds data for faster synchronization.
 COPY --from=0 /var/lib/openvas /var/lib/openvas
 
 ENV DEBIAN_FRONTEND=noninteractive
