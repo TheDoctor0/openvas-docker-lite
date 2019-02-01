@@ -59,13 +59,13 @@ RUN wget -q https://github.com/Arachni/arachni/releases/download/v1.5.1/arachni-
 
 COPY start /start
 COPY update /update
+COPY scan.py scan.py
 COPY redis.conf /etc/redis/redis.conf
-COPY run_scan.py /openvas/run_scan.py
 
 RUN mkdir -p /var/run/redis && \
     chmod +x /start && \
     chmod +x /update && \
-    chmod +x /openvas/run_scan.py && \
+    chmod +x scan.py && \
     sed -i 's/DAEMON_ARGS=""/DAEMON_ARGS="-a 0.0.0.0"/' /etc/init.d/openvas-manager && \
     bash /update && \
     service openvas-scanner stop && \
