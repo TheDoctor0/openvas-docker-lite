@@ -44,6 +44,7 @@ RUN apt-get update && \
         wget \
         xsltproc \
     -yq && \
+    pip install lxml && \
     apt-get purge software-properties-common -yq && \
     apt autoremove -yq && \
     rm -rf /var/lib/apt/lists/*
