@@ -6,10 +6,6 @@ It also contains custom automation script that allow to scan selected targets an
 
 It is lite version and it does not contain Greenbone Security Assistant - web app for managing OpenVAS.
 
-## Requirements
-
-Docker
-
 ## Usage
 
 ### 1. Pull image:
