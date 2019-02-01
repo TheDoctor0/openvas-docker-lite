@@ -63,6 +63,7 @@ COPY scripts/start /start
 COPY scripts/update /update
 COPY scripts/scan.py scan.py
 COPY configs/redis.conf /etc/redis/redis.conf
+COPY configs/openvassd.conf /etc/openvas/openvassd.conf
 
 RUN mkdir -p /var/run/redis && \
     chmod +x /start && \
