@@ -112,7 +112,7 @@ get_report = "omp {} -R {} -f {} --details".format(omp_logon, report_id, report_
 report_response = subprocess.check_output(get_report, stderr=subprocess.STDOUT, shell=True)
 print("Report: {}".format(report_response[:30]))
 
-export_path = "/openvas/results/" + report_file
+export_path = "/reports/" + report_file
 print('Writing report to ' + export_path)
 
 f = open(export_path, 'w')

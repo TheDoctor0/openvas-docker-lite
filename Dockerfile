@@ -66,6 +66,8 @@ COPY configs/redis.conf /etc/redis/redis.conf
 COPY configs/openvassd.conf /etc/openvas/openvassd.conf
 
 RUN mkdir -p /var/run/redis && \
+    mkdir reports && \
+    chmod 777 reports && \
     chmod +x /start && \
     chmod +x /update && \
     chmod +x scan.py && \
