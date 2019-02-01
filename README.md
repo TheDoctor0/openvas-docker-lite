@@ -2,7 +2,7 @@
 
 A Docker container with OpenVAS 9 based on the Ubuntu 18.04 image.
 
-It also contains custom automation script that allow to scan selected targets and generate report with one command.
+It also contains custom automation script that allows to scan selected targets and generate a report with one command.
 
 It is lite version and it does not contain Greenbone Security Assistant - web app for managing OpenVAS.
 
@@ -20,10 +20,10 @@ docker pull thedoctor0/openvas-docker-lite
 docker run --rm -v $(pwd):/openvas/results/:rw thedoctor0/openvas-docker-lite python scan.py <target>
 ```
 
-This will startup the container and update the NVTs cache - it can take some time, so be patient.
-After that, the scan script will run and the progress will be displayed in console.
+This will start up the container and update the NVTs cache - it can take some time, so be patient.
+After that, the scan script will run and the progress will be displayed in the console.
 
-It is possible to specify output file with **-o** or **--output** argument.
+It is possible to specify an output file with **-o** or **--output** argument.
 
 By default report is save as *openvas.report*.
 
@@ -51,9 +51,9 @@ By default report is save as *openvas.report*.
 14. Verinice ITG
 15. XML
 
-You can select what report format will be used with **-f** or **--format** argument with one of available profiles as value.
+You can select what report format will be used with **-f** or **--format** argument with one of the available profiles.
 
-By default *PDF* format is used to generate report.
+By default *PDF* format is used to generate the report.
 
 #### Profiles
 
@@ -66,7 +66,7 @@ By default *PDF* format is used to generate report.
 7. Host Discovery
 8. System Discovery
 
-You can select scan profile by adding **-p** or **--profile** argument with one of available profiles as value.
+You can select scan profile by adding **-p** or **--profile** argument with one of the available profiles.
 
 By default *Full and fast* profile is used.
 
