@@ -12,13 +12,13 @@ Docker
 
 ## Usage
 
-### Pull image:
+### 1. Pull image:
 
 ```
 docker pull thedoctor0/openvas-docker-lite
 ```
 
-### Scan and save report:
+### 2. Scan and save report:
 
 ```
 docker run --rm -v $(pwd):/openvas/results/:rw thedoctor0/openvas-docker-lite python scan.py <target>
