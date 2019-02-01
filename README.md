@@ -18,7 +18,7 @@ docker pull thedoctor0/openvas-docker-lite
 
 Scan:
 ```
-docker run --rm -v $(pwd):/openvas/results/:rw thedoctor0/openvas-docker-lite /openvas/run_scan.py <target> report.html
+docker run --rm -v $(pwd):/openvas/results/:rw thedoctor0/openvas-docker-lite /openvas/run_scan.py <target> report.pdf
 ```
 
 This will startup the container and update the NVTs cache. It can take some time, so be patient.
@@ -26,7 +26,7 @@ After that, the scan script will run and the progress is displayed.
 
 Update and scan:
 ```
-docker run --rm -v $(pwd):/openvas/results/:rw thedoctor0/openvas-docker-lite /openvas/run_scan.py <target> report.html --update
+docker run --rm -v $(pwd):/openvas/results/:rw thedoctor0/openvas-docker-lite /openvas/run_scan.py <target> report.pdf --update
 ```
 
 This works the same as *Scan* command, but will synchronize OpenVAS feeds before making scan.
