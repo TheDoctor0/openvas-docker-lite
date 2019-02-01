@@ -71,7 +71,7 @@ print('Starting scan')
 
 omp_logon = "-u admin -w admin -h 127.0.0.1 -p 9390"
 
-create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts></create_target>'".format(omp_logon, sys.argv[1])
+create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts></create_target>'".format(omp_logon, args.target)
 create_target_response = subprocess.check_output(create_target, stderr=subprocess.STDOUT, shell=True)
 print("Create target reponse: {}".format(create_target_response))
 

@@ -29,8 +29,7 @@ echo "Restarting OpenVAS services"
 echo "Rebuilding OpenVAS cache"
 openvasmd --rebuild
 
-if [ -n "$CREATEUSER" ]
-then
+if [ -n "$CREATEUSER" ]; then
   echo "Creating user"
   /usr/sbin/openvasmd openvasmd --create-user=admin
   /usr/sbin/openvasmd --user=admin --new-password=admin
