@@ -1,0 +1,37 @@
+#!/bin/bash
+DATAVOL=/var/lib/openvas/mgr/
+
+echo "Starting Redis server"
+redis-server /etc/redis/redis.conf
+
+echo "Testing redis status..."
+X="$(redis-cli ping)"
+while  [ "${X}" != "PONG" ]
+do
+  echo "Redis not yet ready..."
+  sleep 1
+  X="$(redis-cli ping)"
+done
+echo "Redis ready."
+
+echo "Checking for empty volume"
+[ -e "$DATAVOL/tasks.db" ] || CREATEUSER=true
+
+echo "Syncing OpenVAS feeds"
+greenbone-nvt-sync --curl --verbose
+greenbone-scapdata-sync
+greenbone-certdata-sync
+
+echo "Restarting OpenVAS services"
+/etc/init.d/openvas-scanner restart
+/etc/init.d/openvas-manager restart
+
+echo "Rebuilding OpenVAS cache"
+openvasmd --rebuild
+
+if [ -n "$CREATEUSER" ]
+then
+  echo "Creating user"
+  /usr/sbin/openvasmd openvasmd --create-user=admin
+  /usr/sbin/openvasmd --user=admin --new-password=admin
+fi

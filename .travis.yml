@@ -1,0 +1,5 @@
+services:
+- docker
+
+script:
+- docker build --no-cache -t gbti/openvas-lite-docker .
