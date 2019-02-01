@@ -27,13 +27,13 @@ It is possible to specify output file with **-o** or **--output** argument.
 
 By default report is save as *openvas.report*.
 
-### Output
+#### Output
 
 It is possible to specify output filename with **-o** or **--output** argument.
 
 By default report is save as *openvas.report*.
 
-### Formats
+#### Formats
 
 1. Anonymous XML
 2. ARF
@@ -55,7 +55,7 @@ You can select what report format will be used with **-f** or **--format** argum
 
 By default *PDF* format is used to generate report.
 
-### Profiles
+#### Profiles
 
 1. Discovery
 2. Empty
@@ -70,7 +70,7 @@ You can select scan profile by adding **-p** or **--profile** argument with one 
 
 By default *Full and fast* profile is used.
 
-### Update
+#### Update
 
 You can also add **--update** argument to force update.
 
