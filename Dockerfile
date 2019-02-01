@@ -59,10 +59,10 @@ RUN wget -q https://github.com/Arachni/arachni/releases/download/v1.5.1/arachni-
     ln -s /opt/arachni/bin/* /usr/local/bin/ && \
     rm -rf arachni*
 
-COPY start /start
-COPY update /update
-COPY scan.py scan.py
-COPY redis.conf /etc/redis/redis.conf
+COPY scripts/start /start
+COPY scripts/update /update
+COPY scripts/scan.py scan.py
+COPY configs/redis.conf /etc/redis/redis.conf
 
 RUN mkdir -p /var/run/redis && \
     chmod +x /start && \
