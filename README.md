@@ -21,11 +21,8 @@ docker run --rm -v $(pwd):/openvas/results/:rw thedoctor0/openvas-docker-lite py
 ```
 
 This will start up the container and update the NVTs cache - it can take some time, so be patient.
+
 After that, the scan script will run and the progress will be displayed in the console.
-
-It is possible to specify an output file with **-o** or **--output** argument.
-
-By default report is save as *openvas.report*.
 
 #### Output
 
