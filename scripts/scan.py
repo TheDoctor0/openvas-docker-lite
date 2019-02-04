@@ -32,8 +32,22 @@ report_formats = {
     "XML":              "a994b278-1f62-11e1-96ac-406186ea4fc5"
 }
 
-scan_profile = scan_profiles["Full and fast"]
-report_format = report_formats["PDF"]
+alive_tests = {
+    "Scan Config Default",
+    "ICMP, TCP-ACK Service & ARP Ping",
+    "TCP-ACK Service & ARP Ping",
+    "ICMP & ARP Ping",
+    "ICMP & TCP-ACK Service Ping",
+    "ARP Ping",
+    "TCP-ACK Service Ping",
+    "TCP-SYN Service Ping",
+    "ICMP Ping",
+    "Consider Alive",
+}
+
+scan_profile = "Full and fast"
+report_format = "PDF"
+alive_test = "ICMP, TCP-ACK Service & ARP Ping"
 report_file = "openvas.report"
 
 parser = argparse.ArgumentParser(description='Run OpenVAS scan with specified target and save report.')
@@ -41,19 +55,26 @@ parser.add_argument('target', help='scan target')
 parser.add_argument('-o', '--output', help='output file (default: openvas.report)', required=False)
 parser.add_argument('-f', '--format', help='format for report (default: PDF)', required=False)
 parser.add_argument('-p', '--profile', help='scan profile (default: Full and fast)', required=False)
+parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK Service & ARP Ping)', required=False)
 parser.add_argument('--update', help='synchronize feeds before scan is started', nargs='?', const=True, default=False, required=False)
 
 args = parser.parse_args()
 
 if args.profile is not None:
     if args.profile in scan_profiles:
-        scan_profile = scan_profiles[args.profile]
+        scan_profile = args.profile
     else:
         print("Invalid scan profile! Using default profile: Full and fast.")
 
+if args.test is not None:
+    if args.test in alive_tests:
+        alive_test = args.test
+    else:
+        print("Invalid alive test! Using default test: ICMP, TCP-ACK Service & ARP Ping.")
+
 if args.format is not None:
     if args.format in report_formats:
-        report_format = report_formats[args.format]
+        report_format = args.format
     else:
         print("Invalid report format! Using default format: PDF.")
 
@@ -61,24 +82,24 @@ if args.output is not None:
     report_file = args.output
 
 if args.update is True:
-    print('Starting and updating OpenVAS')
+    print("Starting and updating OpenVAS")
     subprocess.call(['/update'])
 else:
-    print('Starting OpenVAS')
+    print("Starting OpenVAS")
     subprocess.call(['/start'])
 
-print('Starting scan')
+print("Starting scan with settings:\n*Scan profile: {}\n*Alive tests: {}\n*Report format: {}\n*Output file: {}".format(scan_profile, alive_test, report_format, report_file))
 
 omp_logon = "-u admin -w admin -h 127.0.0.1 -p 9390"
 
-create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts></create_target>'".format(omp_logon, args.target)
+create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts><alive_tests>{2}</alive_tests></create_target>'".format(omp_logon, args.target, alive_test.replace("&", "&amp;"))
 create_target_response = subprocess.check_output(create_target, stderr=subprocess.STDOUT, shell=True)
 print("Create target reponse: {}".format(create_target_response))
 
 target_id = etree.XML(create_target_response).xpath("//create_target_response")[0].get("id")
 print("Target ID: {}".format(target_id))
 
-create_task = ("omp {} -C --target={} --config={} --name=scan").format(omp_logon, target_id, scan_profile)
+create_task = ("omp {} -C --target={} --config={} --name=scan").format(omp_logon, target_id, scan_profiles[scan_profile])
 task_id = subprocess.check_output(create_task, stderr=subprocess.STDOUT, shell=True).strip()
 print("Task ID: {}".format(task_id))
 
@@ -97,8 +118,12 @@ while status != "Done":
         get_status_response = subprocess.check_output(get_status, stderr=subprocess.STDOUT, shell=True)
         status = etree.XML(get_status_response).xpath("//status")[0].text
         progress = etree.XML(get_status_response).xpath("//progress")[0].text
-        os.system('clear')
-        print("Task status: {} {}%".format(status, progress))
+        os.system("clear")
+
+        if int(progress) > 0:
+            print("Task status: {} {}%".format(status, progress))
+        else:
+            print("Task status: Complete")
     except subprocess.CalledProcessError as exc:
         print("Error: ", exc.output)
 
@@ -108,12 +133,11 @@ print("OpenVAS Log: {}".format(openvaslog))
 report_id = etree.XML(get_status_response).xpath("//report")[0].get("id")
 print("Report ID: {}".format(report_id))
 
-get_report = "omp {} -R {} -f {} --details".format(omp_logon, report_id, report_format)
+get_report = "omp {} -R {} -f {} --details".format(omp_logon, report_id, report_formats[report_format])
 report_response = subprocess.check_output(get_report, stderr=subprocess.STDOUT, shell=True)
-print("Report: {}".format(report_response[:30]))
 
 export_path = "/reports/" + report_file
-print('Writing report to ' + export_path)
+print("Writing report to {}".format(export_path))
 
 f = open(export_path, 'w')
 f.write(report_response)
