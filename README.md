@@ -28,7 +28,7 @@ After that, the scan script will run and the progress will be displayed in the c
 
 It is possible to specify output filename with **-o** or **--output** argument.
 
-By default report is save as *openvas.report*.
+By default report is saved as *openvas.report*.
 
 #### Formats
 
@@ -66,6 +66,23 @@ By default *PDF* format is used to generate the report.
 You can select scan profile by adding **-p** or **--profile** argument with one of the available profiles.
 
 By default *Full and fast* profile is used.
+
+#### Alive Tests
+
+1. Scan Config Default
+2. ICMP, TCP-ACK Service & ARP Ping
+3. TCP-ACK Service & ARP Ping
+4. ICMP & ARP Ping
+5. ICMP & TCP-ACK Service Ping
+6. ARP Ping
+7. TCP-ACK Service Ping
+8. TCP-SYN Service Ping
+9. ICMP Ping
+10. Consider Alive
+
+You can select scan alive tests by adding **-t** or **--tests** argument with one of the available tests.
+
+By default *ICMP, TCP-ACK Service & ARP Ping* alive tests are used.
 
 #### Update
 
