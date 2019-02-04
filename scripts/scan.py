@@ -143,4 +143,14 @@ f = open(export_path, 'w')
 f.write(report_response)
 f.close()
 
-print('Done!')
+print("Performing cleanup")
+
+delete_task = ("omp {} -D {}").format(omp_logon, task_id)
+delete_task_reponse = subprocess.check_output(delete_task, stderr=subprocess.STDOUT, shell=True).strip()
+print("Delete task response: {}".format(delete_task_reponse))
+
+delete_target = ("omp {} -X '<delete_target target_id=\"{}\"/>'").format(omp_logon, target_id)
+delete_target_response = subprocess.check_output(delete_target, stderr=subprocess.STDOUT, shell=True).strip()
+print("Delete target response: {}".format(delete_target_response))
+
+print("Done!")
