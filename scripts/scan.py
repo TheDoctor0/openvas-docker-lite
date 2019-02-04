@@ -66,9 +66,9 @@ if args.profile is not None:
     else:
         print("Invalid scan profile! Using default profile: Full and fast.")
 
-if args.test is not None:
-    if args.test in alive_tests:
-        alive_test = args.test
+if args.tests is not None:
+    if args.tests in alive_tests:
+        alive_test = args.tests
     else:
         print("Invalid alive test! Using default test: ICMP, TCP-ACK Service & ARP Ping.")
 
