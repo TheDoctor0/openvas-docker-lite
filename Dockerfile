@@ -6,6 +6,7 @@ FROM ubuntu:18.04
 COPY --from=0 /var/lib/openvas /var/lib/openvas
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV TERM dumb
 
 RUN apt-get update && \
     apt-get install software-properties-common --no-install-recommends -yq && \
