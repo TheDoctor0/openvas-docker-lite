@@ -46,7 +46,7 @@ alive_tests = {
 }
 
 scan_profile = "Full and fast"
-report_format = "PDF"
+report_format = "ARF"
 alive_test = "ICMP, TCP-ACK Service & ARP Ping"
 report_file = "openvas.report"
 

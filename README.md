@@ -50,7 +50,7 @@ By default report is saved as *openvas.report*.
 
 You can select what report format will be used with **-f** or **--format** argument with one of the available profiles.
 
-By default *PDF* format is used to generate the report.
+By default *ARF* format is used to generate the report.
 
 #### Profiles
 
@@ -83,6 +83,12 @@ By default *Full and fast* profile is used.
 You can select scan alive tests by adding **-t** or **--tests** argument with one of the available tests.
 
 By default *ICMP, TCP-ACK Service & ARP Ping* alive tests are used.
+
+#### Exclude Hosts
+
+You can exclude hosts from specified target by adding **-e** or **--exclude** argument with list of IPs.
+
+By default list of excluded hosts is empty.
 
 #### Update
 
