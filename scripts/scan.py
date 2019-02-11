@@ -56,6 +56,7 @@ parser.add_argument('-o', '--output', help='output file (default: openvas.report
 parser.add_argument('-f', '--format', help='format for report (default: PDF)', required=False)
 parser.add_argument('-p', '--profile', help='scan profile (default: Full and fast)', required=False)
 parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK Service & ARP Ping)', required=False)
+parser.add_argument('-e', '--exclude', help='hosts excluded from scan target', required=False)
 parser.add_argument('--update', help='synchronize feeds before scan is started', nargs='?', const=True, default=False, required=False)
 
 args = parser.parse_args()
@@ -88,11 +89,11 @@ else:
     print("Starting OpenVAS")
     subprocess.call(['/start'])
 
-print("Starting scan with settings:\n*Scan profile: {}\n*Alive tests: {}\n*Report format: {}\n*Output file: {}".format(scan_profile, alive_test, report_format, report_file))
+print("Starting scan with settings:*\nTarget: {}\n*Excluded hosts: {}\n*Scan profile: {}\n*Alive tests: {}\n*Report format: {}\n*Output file: {}".format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
 
 omp_logon = "-u admin -w admin -h 127.0.0.1 -p 9390"
 
-create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts><alive_tests>{2}</alive_tests></create_target>'".format(omp_logon, args.target, alive_test.replace("&", "&amp;"))
+create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts><alive_tests>{2}</alive_tests><exclude_hosts>{3}</exclude_hosts></create_target>'".format(omp_logon, args.target, alive_test.replace("&", "&amp;"), args.exclude)
 create_target_response = subprocess.check_output(create_target, stderr=subprocess.STDOUT, shell=True)
 print("Create target reponse: {}".format(create_target_response))
 
