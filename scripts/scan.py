@@ -58,6 +58,7 @@ parser.add_argument('-p', '--profile', help='scan profile (default: Full and fas
 parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK Service & ARP Ping)', required=False)
 parser.add_argument('-e', '--exclude', help='hosts excluded from scan target', required=False)
 parser.add_argument('--update', help='synchronize feeds before scan is started', nargs='?', const=True, default=False, required=False)
+parser.add_argument('--debug', help='enable printing OMP command responses and OpenVAS logs', nargs='?', const=True, default=False, required=False)
 
 args = parser.parse_args()
 
@@ -83,13 +84,13 @@ if args.output is not None:
     report_file = args.output
 
 if args.update is True:
-    print("Starting and updating OpenVAS")
+    print("Starting and updating OpenVAS...")
     subprocess.call(['/update'])
 else:
-    print("Starting OpenVAS")
+    print("Starting OpenVAS...")
     subprocess.call(['/start'])
 
-print("Starting scan with settings:*\nTarget: {}\n*Excluded hosts: {}\n*Scan profile: {}\n*Alive tests: {}\n*Report format: {}\n*Output file: {}".format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
+print("Starting scan with settings:\n* Target: {}\n* Excluded hosts: {}\n* Scan profile: {}\n* Alive tests: {}\n* Report format: {}\n* Output file: {}".format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
 
 omp_logon = "-u admin -w admin -h 127.0.0.1 -p 9390"
 
@@ -97,36 +98,50 @@ print("Performing initial cleanup...")
 
 existing_task = "omp {} -G | cut -d ' ' -f 1".format(omp_logon)
 existing_task_response = subprocess.check_output(existing_task, stderr=subprocess.STDOUT, shell=True)
+if args.debug:
+    print("Response: {}".format(existing_task_response))
 
 if existing_task_response != "":
     cleanup_task = ("omp {} -D {}").format(omp_logon, existing_task_response.strip())
     cleanup_task_response = subprocess.check_output(cleanup_task, stderr=subprocess.STDOUT, shell=True).strip()
     print("Deleted existing task.")
+    if args.debug:
+        print("Response: {}".format(cleanup_task_response))
+
 existing_target = "omp {} -T | grep ""{}"" | cut -d ' ' -f 1".format(omp_logon, args.target)
 existing_target_response = subprocess.check_output(existing_target, stderr=subprocess.STDOUT, shell=True)
+if args.debug:
+    print("Response: {}".format(existing_target_response))
 
 if existing_target_response != "":
     cleanup_target = ("omp {} -X '<delete_target target_id=\"{}\"/>'").format(omp_logon, existing_target_response.strip())
     cleanup_target_response = subprocess.check_output(cleanup_target, stderr=subprocess.STDOUT, shell=True).strip()
+    print("Deleted existing target.")
+    if args.debug:
+        print("Response: {}".format(cleanup_target_response))
 
 create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts><alive_tests>{2}</alive_tests><exclude_hosts>{3}</exclude_hosts></create_target>'".format(omp_logon, args.target, alive_test.replace("&", "&amp;"), args.exclude)
 create_target_response = subprocess.check_output(create_target, stderr=subprocess.STDOUT, shell=True)
-print("Create target reponse: {}".format(create_target_response))
-
 target_id = etree.XML(create_target_response).xpath("//create_target_response")[0].get("id")
-print("Target ID: {}".format(target_id))
+print("Created target with id: {}.".format(target_id))
+if args.debug:
+    print("Response: {}".format(create_target_response))
 
 create_task = ("omp {} -C --target={} --config={} --name=scan").format(omp_logon, target_id, scan_profiles[scan_profile])
 task_id = subprocess.check_output(create_task, stderr=subprocess.STDOUT, shell=True).strip()
-print("Task ID: {}".format(task_id))
+print("Created task with id: {}.".format(task_id))
+if args.debug:
+    print("Response: {}".format(task_id))
 
 start_task = "omp {} -S {}".format(omp_logon, task_id)
 start_task_response = subprocess.check_output(start_task, stderr=subprocess.STDOUT, shell=True)
-print("Start task response: {}".format(start_task_response))
+print("Started task.")
+if args.debug:
+    print("Response: {}".format(start_task_response))
 
 status = ""
 get_status = "omp {} --xml '<get_tasks task_id=\"{}\"/>'".format(omp_logon, task_id)
-print("Waiting for task to finish")
+print("Waiting for task to finish...")
 
 while status != "Done":
     try:
@@ -135,39 +150,48 @@ while status != "Done":
         get_status_response = subprocess.check_output(get_status, stderr=subprocess.STDOUT, shell=True)
         status = etree.XML(get_status_response).xpath("//status")[0].text
         progress = etree.XML(get_status_response).xpath("//progress")[0].text
-        os.system("clear")
+        if args.debug is False:
+            os.system("clear")
 
         if int(progress) > 0:
             print("Task status: {} {}%".format(status, progress))
         else:
             print("Task status: Complete")
+
+        if args.debug:
+            print("Response: {}".format(get_status_response))
     except subprocess.CalledProcessError as exc:
         print("Error: ", exc.output)
 
-openvaslog = open("/var/log/openvas/openvassd.messages", "r").read()
-print("OpenVAS Log: {}".format(openvaslog))
+if args.debug:
+    openvaslog = open("/var/log/openvas/openvassd.messages", "r").read()
+    print("OpenVAS Log: {}".format(openvaslog))
 
 report_id = etree.XML(get_status_response).xpath("//report")[0].get("id")
-print("Report ID: {}".format(report_id))
-
 get_report = "omp {} -R {} -f {} --details".format(omp_logon, report_id, report_formats[report_format])
-report_response = subprocess.check_output(get_report, stderr=subprocess.STDOUT, shell=True)
+get_report_response = subprocess.check_output(get_report, stderr=subprocess.STDOUT, shell=True)
+print("Generated report.")
+if args.debug:
+    print("Response: {}".format(get_report_response))
 
 export_path = "/reports/" + report_file
-print("Writing report to {}".format(export_path))
-
 f = open(export_path, 'w')
-f.write(report_response)
+f.write(get_report_response)
 f.close()
+print("Saved report to {}.".format(export_path))
 
-print("Performing cleanup")
+print("Performing cleanup...")
 
 delete_task = ("omp {} -D {}").format(omp_logon, task_id)
 delete_task_reponse = subprocess.check_output(delete_task, stderr=subprocess.STDOUT, shell=True).strip()
-print("Delete task response: {}".format(delete_task_reponse))
+print("Deleted task.")
+if args.debug:
+    print("Response: {}".format(delete_task_reponse))
 
 delete_target = ("omp {} -X '<delete_target target_id=\"{}\"/>'").format(omp_logon, target_id)
 delete_target_response = subprocess.check_output(delete_target, stderr=subprocess.STDOUT, shell=True).strip()
-print("Delete target response: {}".format(delete_target_response))
+print("Deleted target.")
+if args.debug:
+    print("Response: {}".format(delete_target_response))
 
 print("Done!")

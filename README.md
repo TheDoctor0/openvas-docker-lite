@@ -90,6 +90,10 @@ You can exclude hosts from specified target by adding **-e** or **--exclude** ar
 
 By default list of excluded hosts is empty.
 
+#### Debug
+
+You can enable printing OMP command responses and OpenVAS logs by adding **--debug** argument.
+
 #### Update
 
 You can also add **--update** argument to force update.
