@@ -93,6 +93,22 @@ print("Starting scan with settings:*\nTarget: {}\n*Excluded hosts: {}\n*Scan pro
 
 omp_logon = "-u admin -w admin -h 127.0.0.1 -p 9390"
 
+print("Performing initial cleanup...")
+
+existing_task = "omp {} -G | cut -d ' ' -f 1".format(omp_logon)
+existing_task_response = subprocess.check_output(existing_task, stderr=subprocess.STDOUT, shell=True)
+
+if existing_task_response != "":
+    cleanup_task = ("omp {} -D {}").format(omp_logon, existing_task_response.strip())
+    cleanup_task_response = subprocess.check_output(cleanup_task, stderr=subprocess.STDOUT, shell=True).strip()
+    print("Deleted existing task.")
+existing_target = "omp {} -T | grep ""{}"" | cut -d ' ' -f 1".format(omp_logon, args.target)
+existing_target_response = subprocess.check_output(existing_target, stderr=subprocess.STDOUT, shell=True)
+
+if existing_target_response != "":
+    cleanup_target = ("omp {} -X '<delete_target target_id=\"{}\"/>'").format(omp_logon, existing_target_response.strip())
+    cleanup_target_response = subprocess.check_output(cleanup_target, stderr=subprocess.STDOUT, shell=True).strip()
+
 create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts><alive_tests>{2}</alive_tests><exclude_hosts>{3}</exclude_hosts></create_target>'".format(omp_logon, args.target, alive_test.replace("&", "&amp;"), args.exclude)
 create_target_response = subprocess.check_output(create_target, stderr=subprocess.STDOUT, shell=True)
 print("Create target reponse: {}".format(create_target_response))
