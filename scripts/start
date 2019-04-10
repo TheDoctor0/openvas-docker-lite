@@ -21,6 +21,9 @@ echo "Restarting services"
 /etc/init.d/openvas-scanner restart
 /etc/init.d/openvas-manager restart
 
+echo "Reloading NVTs cache"
+openvasmd --rebuild
+
 if [ -n "$CREATEUSER" ]; then
   echo "Creating user"
   /usr/sbin/openvasmd openvasmd --create-user=admin
