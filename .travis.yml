@@ -2,4 +2,6 @@ services:
 - docker
 
 script:
-- docker build --no-cache -t thedoctor0/openvas-docker-lite .
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+- docker build --no-cache -t $DOCKER_USERNAME/openvas-docker-lite .
+- docker push $DOCKER_USERNAME/openvas-docker-lite
