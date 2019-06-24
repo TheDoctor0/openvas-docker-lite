@@ -7,9 +7,6 @@ ENV TERM dumb
 
 # Install general packages
 RUN apt-get update && \
-    apt-get install software-properties-common --no-install-recommends -yq && \
-    apt-get clean && \
-    apt-get update && \
     apt-get install alien \
         bsdtar \
         bzip2 \
@@ -46,6 +43,7 @@ RUN apt-get update && \
     
 # Install OpenVAS components
 RUN apt-get update && \
+    apt-get install software-properties-common --no-install-recommends -yq && \
     add-apt-repository ppa:mrazavi/openvas -y && \
     apt-get clean && \
     apt-get update && \
