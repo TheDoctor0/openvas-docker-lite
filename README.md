@@ -1,4 +1,4 @@
-# OpenVAS Docker Lite
+# OpenVAS Docker Lite [![Build Status](https://travis-ci.org/TheDoctor0/openvas-docker-lite.png)](https://travis-ci.org/TheDoctor0/openvas-docker-lite) [![Docker Pulls](https://img.shields.io/docker/pulls/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite) [![Docker Stars](https://img.shields.io/docker/stars/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite) [![](https://images.microbadger.com/badges/image/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite)
 
 A Docker container with OpenVAS 9 based on the Ubuntu 18.04 image.
 
