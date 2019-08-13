@@ -85,10 +85,12 @@ if args.output is not None:
 
 if args.update is True:
     print("Starting and updating OpenVAS...")
-    subprocess.call(['/update'])
+    with open(os.devnull, 'w') as devnull:
+        subprocess.check_call(["/update"], shell=True, stdout=devnull)
 else:
     print("Starting OpenVAS...")
-    subprocess.call(['/start'])
+    with open(os.devnull, 'w') as devnull:
+        subprocess.check_call(["/start"], shell=True, stdout=devnull)
 
 print("Starting scan with settings:\n* Target: {}\n* Excluded hosts: {}\n* Scan profile: {}\n* Alive tests: {}\n* Report format: {}\n* Output file: {}".format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
 
