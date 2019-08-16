@@ -20,7 +20,8 @@ RUN apt-get update && \
         nmap \
         nsis \
         openssh-client \
-        python-pip \
+        python3-pip \
+        python3 \
         rpm \
         rsync \
         redis \

@@ -17,7 +17,7 @@ docker pull thedoctor0/openvas-docker-lite
 ### 2. Scan and save report:
 
 ```
-docker run --rm -v $(pwd):/reports/:rw thedoctor0/openvas-docker-lite python scan.py <target>
+docker run --rm -v $(pwd):/reports/:rw thedoctor0/openvas-docker-lite python3 -u scan.py <target>
 ```
 
 This will start up the container and update the NVTs cache - it can take some time, so be patient.

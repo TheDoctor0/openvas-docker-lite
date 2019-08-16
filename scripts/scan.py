@@ -1,7 +1,10 @@
-#!/usr/bin/python
-from __future__ import print_function
+#!/usr/bin/env python3
+
 from lxml import etree
-import os, sys, time, subprocess, argparse
+import subprocess
+import argparse
+import time
+import os
 
 scan_profiles = {
     "Discovery":                    "8715c877-47a0-438d-98a3-27c7a6ab2196",
@@ -52,13 +55,20 @@ report_file = "openvas.report"
 
 parser = argparse.ArgumentParser(description='Run OpenVAS scan with specified target and save report.')
 parser.add_argument('target', help='scan target')
-parser.add_argument('-o', '--output', help='output file (default: openvas.report)', required=False)
-parser.add_argument('-f', '--format', help='format for report (default: PDF)', required=False)
-parser.add_argument('-p', '--profile', help='scan profile (default: Full and fast)', required=False)
-parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK Service & ARP Ping)', required=False)
-parser.add_argument('-e', '--exclude', help='hosts excluded from scan target', required=False)
-parser.add_argument('--update', help='synchronize feeds before scan is started', nargs='?', const=True, default=False, required=False)
-parser.add_argument('--debug', help='enable printing OMP command responses and OpenVAS logs', nargs='?', const=True, default=False, required=False)
+parser.add_argument('-o', '--output', help='output file (default: openvas.report)',
+                    required=False)
+parser.add_argument('-f', '--format', help='format for report (default: PDF)',
+                    required=False)
+parser.add_argument('-p', '--profile', help='scan profile (default: Full and fast)',
+                    required=False)
+parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK Service & ARP Ping)',
+                    required=False)
+parser.add_argument('-e', '--exclude', help='hosts excluded from scan target',
+                    required=False)
+parser.add_argument('--update', help='synchronize feeds before scan is started',
+                    nargs='?', const=True, default=False, required=False)
+parser.add_argument('--debug', help='enable printing OMP command responses and OpenVAS logs',
+                    nargs='?', const=True, default=False, required=False)
 
 args = parser.parse_args()
 
@@ -66,19 +76,19 @@ if args.profile is not None:
     if args.profile in scan_profiles:
         scan_profile = args.profile
     else:
-        print("Invalid scan profile! Using default profile: Full and fast.")
+        print("{} is not a valid option for profile! Using default: {}.".format(args.profile, scan_profile))
 
 if args.tests is not None:
     if args.tests in alive_tests:
         alive_test = args.tests
     else:
-        print("Invalid alive test! Using default test: ICMP, TCP-ACK Service & ARP Ping.")
+        print("{} is not valid option for alive tests! Using default: {}.".format(args.tests, alive_tests))
 
 if args.format is not None:
     if args.format in report_formats:
         report_format = args.format
     else:
-        print("Invalid report format! Using default format: PDF.")
+        print("{} is not a valid option for report format! Using default: {}.".format(args.format, report_format))
 
 if args.output is not None:
     report_file = args.output
@@ -92,7 +102,9 @@ else:
     with open(os.devnull, 'w') as devnull:
         subprocess.check_call(["/start"], shell=True, stdout=devnull)
 
-print("Starting scan with settings:\n* Target: {}\n* Excluded hosts: {}\n* Scan profile: {}\n* Alive tests: {}\n* Report format: {}\n* Output file: {}".format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
+print("Starting scan with settings:\n* Target: {}\n* Excluded hosts: {}\n* Scan profile: {}"
+      + "\n* Alive tests: {}\n* Report format: {}\n* Output file: {}"
+      .format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
 
 omp_logon = "-u admin -w admin -h 127.0.0.1 -p 9390"
 
@@ -104,7 +116,7 @@ if args.debug:
     print("Response: {}".format(existing_task_response))
 
 if existing_task_response != "":
-    cleanup_task = ("omp {} -D {}").format(omp_logon, existing_task_response.strip())
+    cleanup_task = "omp {} -D {}".format(omp_logon, existing_task_response.strip())
     cleanup_task_response = subprocess.check_output(cleanup_task, stderr=subprocess.STDOUT, shell=True).strip()
     print("Deleted existing task.")
     if args.debug:
@@ -116,20 +128,22 @@ if args.debug:
     print("Response: {}".format(existing_target_response))
 
 if existing_target_response != "":
-    cleanup_target = ("omp {} -X '<delete_target target_id=\"{}\"/>'").format(omp_logon, existing_target_response.strip())
+    cleanup_target = "omp {} -X '<delete_target target_id=\"{}\"/>'".format(omp_logon, existing_target_response.strip())
     cleanup_target_response = subprocess.check_output(cleanup_target, stderr=subprocess.STDOUT, shell=True).strip()
     print("Deleted existing target.")
     if args.debug:
         print("Response: {}".format(cleanup_target_response))
 
-create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts><alive_tests>{2}</alive_tests><exclude_hosts>{3}</exclude_hosts></create_target>'".format(omp_logon, args.target, alive_test.replace("&", "&amp;"), args.exclude)
+create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts>" \
+                + "<alive_tests>{2}</alive_tests><exclude_hosts>{3}</exclude_hosts></create_target>'"\
+    .format(omp_logon, args.target, alive_test.replace("&", "&amp;"), args.exclude)
 create_target_response = subprocess.check_output(create_target, stderr=subprocess.STDOUT, shell=True)
 target_id = etree.XML(create_target_response).xpath("//create_target_response")[0].get("id")
 print("Created target with id: {}.".format(target_id))
 if args.debug:
     print("Response: {}".format(create_target_response))
 
-create_task = ("omp {} -C --target={} --config={} --name=scan").format(omp_logon, target_id, scan_profiles[scan_profile])
+create_task = "omp {} -C --target={} --config={} --name=scan".format(omp_logon, target_id, scan_profiles[scan_profile])
 task_id = subprocess.check_output(create_task, stderr=subprocess.STDOUT, shell=True).strip()
 print("Created task with id: {}.".format(task_id))
 if args.debug:
@@ -144,6 +158,8 @@ if args.debug:
 status = ""
 get_status = "omp {} --xml '<get_tasks task_id=\"{}\"/>'".format(omp_logon, task_id)
 print("Waiting for task to finish...")
+
+get_status_response = None
 
 while status != "Done":
     try:
@@ -184,13 +200,13 @@ print("Saved report to {}.".format(export_path))
 
 print("Performing cleanup...")
 
-delete_task = ("omp {} -D {}").format(omp_logon, task_id)
+delete_task = "omp {} -D {}".format(omp_logon, task_id)
 delete_task_reponse = subprocess.check_output(delete_task, stderr=subprocess.STDOUT, shell=True).strip()
 print("Deleted task.")
 if args.debug:
     print("Response: {}".format(delete_task_reponse))
 
-delete_target = ("omp {} -X '<delete_target target_id=\"{}\"/>'").format(omp_logon, target_id)
+delete_target = "omp {} -X '<delete_target target_id=\"{}\"/>'".format(omp_logon, target_id)
 delete_target_response = subprocess.check_output(delete_target, stderr=subprocess.STDOUT, shell=True).strip()
 print("Deleted target.")
 if args.debug:
