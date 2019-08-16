@@ -82,7 +82,7 @@ if args.tests is not None:
     if args.tests in alive_tests:
         alive_test = args.tests
     else:
-        print("{} is not valid option for alive tests! Using default: {}.".format(args.tests, alive_tests))
+        print("{} is not valid option for alive tests! Using default: {}.".format(args.tests, alive_test))
 
 if args.format is not None:
     if args.format in report_formats:
