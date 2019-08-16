@@ -102,9 +102,7 @@ else:
     with open(os.devnull, 'w') as devnull:
         subprocess.check_call(["/start"], shell=True, stdout=devnull)
 
-print("Starting scan with settings:\n* Target: {}\n* Excluded hosts: {}\n* Scan profile: {}"
-      + "\n* Alive tests: {}\n* Report format: {}\n* Output file: {}"
-      .format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
+print("Starting scan with settings:\n* Target: {}\n* Excluded hosts: {}\n* Scan profile: {}\n* Alive tests: {}\n* Report format: {}\n* Output file: {}".format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
 
 omp_logon = "-u admin -w admin -h 127.0.0.1 -p 9390"
 
@@ -134,9 +132,7 @@ if existing_target_response != "":
     if args.debug:
         print("Response: {}".format(cleanup_target_response))
 
-create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts>" \
-                + "<alive_tests>{2}</alive_tests><exclude_hosts>{3}</exclude_hosts></create_target>'"\
-    .format(omp_logon, args.target, alive_test.replace("&", "&amp;"), args.exclude)
+create_target = "omp {0} --xml '<create_target><name>{1}</name><hosts>{1}</hosts><alive_tests>{2}</alive_tests><exclude_hosts>{3}</exclude_hosts></create_target>'".format(omp_logon, args.target, alive_test.replace("&", "&amp;"), args.exclude)
 create_target_response = subprocess.check_output(create_target, stderr=subprocess.STDOUT, shell=True)
 target_id = etree.XML(create_target_response).xpath("//create_target_response")[0].get("id")
 print("Created target with id: {}.".format(target_id))
