@@ -17,7 +17,7 @@ docker pull thedoctor0/openvas-docker-lite
 ### 2. Scan and save report:
 
 ```
-docker run --rm -v $(pwd):/reports/:rw thedoctor0/openvas-docker-lite python3 -u scan.py <target>
+docker run --rm -v $(pwd):/reports/:rw thedoctor0/openvas-docker-lite python3 -u scan.py <target> [options]
 ```
 
 This will start up the container and update the NVTs cache - it can take some time, so be patient.
@@ -89,6 +89,20 @@ By default *ICMP, TCP-ACK Service & ARP Ping* alive tests are used.
 You can exclude hosts from specified target by adding **-e** or **--exclude** argument with list of IPs.
 
 By default list of excluded hosts is empty.
+
+#### Max Hosts
+
+It is possible to override *max_hosts* variable in OpenVAS config which specify maximum number of simultaneous hosts tested.
+Just add **-m** or **--max** argument with wanted numeric value.
+
+By default **1** is used as *max_hosts* variable value.
+
+#### Max Checks
+
+It is possible to override *max_checks* variable in OpenVAS config which specify maximum number of simultaneous checks against each host tested.
+Just add **-c** or **--checks** argument with wanted numeric value.
+
+By default **10** is used as *max_checks* variable value.
 
 #### Debug
 

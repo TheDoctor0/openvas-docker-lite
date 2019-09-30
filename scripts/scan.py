@@ -52,6 +52,8 @@ scan_profile = "Full and fast"
 report_format = "ARF"
 alive_test = "ICMP, TCP-ACK Service & ARP Ping"
 report_file = "openvas.report"
+max_hosts = 1
+max_checks = 10
 
 parser = argparse.ArgumentParser(description='Run OpenVAS scan with specified target and save report.')
 parser.add_argument('target', help='scan target')
@@ -65,6 +67,10 @@ parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK S
                     required=False)
 parser.add_argument('-e', '--exclude', help='hosts excluded from scan target',
                     required=False)
+parser.add_argument('-m', '--max', help='maximum number of simultaneous hosts tested',
+                    type=int, required=False)
+parser.add_argument('-c', '--checks', help='maximum number of simultaneous checks against each host tested',
+                    type=int, required=False)
 parser.add_argument('--update', help='synchronize feeds before scan is started',
                     nargs='?', const=True, default=False, required=False)
 parser.add_argument('--debug', help='enable printing OMP command responses and OpenVAS logs',
@@ -93,6 +99,16 @@ if args.format is not None:
 if args.output is not None:
     report_file = args.output
 
+if args.max is not None:
+    max_hosts = args.max
+
+if args.checks is not None:
+    max_checks = args.checks
+
+with open(os.devnull, 'w') as devnull:
+    subprocess.check_call(["sed -i 's/max_hosts.*/max_hosts = " + str(max_hosts) + "/' /etc/openvas/openvassd.conf"], shell=True, stdout=devnull)
+    subprocess.check_call(["sed -i 's/max_checks.*/max_checks = " + str(max_checks) + "/' /etc/openvas/openvassd.conf"], shell=True, stdout=devnull)
+
 if args.update is True:
     print("Starting and updating OpenVAS...")
     with open(os.devnull, 'w') as devnull:
@@ -102,7 +118,7 @@ else:
     with open(os.devnull, 'w') as devnull:
         subprocess.check_call(["/start"], shell=True, stdout=devnull)
 
-print("Starting scan with settings:\n* Target: {}\n* Excluded hosts: {}\n* Scan profile: {}\n* Alive tests: {}\n* Report format: {}\n* Output file: {}".format(args.target, args.exclude, scan_profile, alive_test, report_format, report_file))
+print("Starting scan with settings:\n* Target: {}\n* Excluded hosts: {}\n* Scan profile: {}\n* Alive tests: {}\n* Max hosts: {}\n\n* Max checks: {}\n\n* Report format: {}\n* Output file: {}".format(args.target, args.exclude, scan_profile, alive_test, max_hosts, max_checks, report_format, report_file))
 
 omp_logon = "-u admin -w admin -h 127.0.0.1 -p 9390"
 
