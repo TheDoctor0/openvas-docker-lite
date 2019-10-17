@@ -1,7 +1,5 @@
 #!/bin/bash
-DATAVOL=/var/lib/openvas/mgr/
-
-echo "Starting Redis server"
+echo "Starting Redis server..."
 redis-server /etc/redis/redis.conf
 
 echo "Testing redis status..."
@@ -14,18 +12,31 @@ do
 done
 echo "Redis ready."
 
-echo "Checking for empty volume"
-[ -e "$DATAVOL/tasks.db" ] || CREATEUSER=true
+echo "Starting PostgreSQL..."
+/etc/init.d/postgresql start
+echo "PostgreSQL ready."
 
-echo "Restarting services"
-/etc/init.d/openvas-scanner restart
-/etc/init.d/openvas-manager restart
+echo "Starting OpenVAS Scanner..."
+ldconfig && openvas
+sleep 2
+X="$(ps aufx | grep openvas | grep -v 'grep')"
+while  [ "${#X}" == 0 ]; do
+        echo "OpenVAS Scanner not yet ready..."
+        ldconfig && openvas
+        sleep 2
+        X="$(ps aufx | grep openvas | grep -v 'grep')"
+done
+echo "OpenVAS Scanner ready."
 
-echo "Reloading NVTs cache"
-openvasmd --rebuild
-
-if [ -n "$CREATEUSER" ]; then
-  echo "Creating user"
-  /usr/sbin/openvasmd openvasmd --create-user=admin
-  /usr/sbin/openvasmd --user=admin --new-password=admin
-fi
+echo "Starting GVMD..."
+ldconfig && gvmd
+echo "Testing GVMD status..."
+sleep 1
+X="$(ps | grep gvmd)"
+while  [ "${#X}" == 0 ]; do
+        echo "GVMD not yet ready..."
+        ldconfig && gvmd
+        sleep 1
+        X="$(ps | grep gvmd)"
+done
+echo "GVMD ready."

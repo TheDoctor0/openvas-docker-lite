@@ -1,93 +1,139 @@
-FROM thedoctor0/openvas-docker-lite
+FROM debian:buster
 
-FROM ubuntu:18.04
+ENV GVM_LIBS_VERSION '11.0.0'
+ENV GVMD_VERSION '9.0.0'
+ENV OPENVAS_VERSION '7.0.0'
+ENV OPENVAS_SMB_VERSION '1.0.5'
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM dumb
 
-# Install general packages
 RUN apt-get update && \
-    apt-get install alien \
-        bsdtar \
-        bzip2 \
+    apt-get install \
+        postgresql \
+        postgresql-contrib \
+        postgresql-server-dev-all \
+        python-setuptools \
         curl \
-        dirb \
-        dnsutils \
+        unzip \
         git \
-        libsasl2-modules \
-        net-tools \
-        nikto \
-        nmap \
-        nsis \
-        openssh-client \
         python3-pip \
         python3 \
-        rpm \
         rsync \
-        redis \
+        nmap \
+        snmp \
+        sudo \
         redis-server \
-        smbclient \
-        socat \
-        sqlite3 \
-        sshpass \
-        texlive-latex-base \
-        texlive-latex-extra \
-        texlive-latex-recommended \
-        wapiti \
-        wget \
+        cmake \
+        pkg-config \
+        libglib2.0-dev \
+        libgpgme11-dev \
+        libgnutls28-dev \
+        libssh-gcrypt-dev \
+        libldap2-dev \
+        libhiredis-dev \
+        libpcap-dev \
+        libksba-dev \
+        libsnmp-dev \
+        libical-dev \
+        libgcrypt20-dev \
+        libpopt-dev \
+        gcc-mingw-w64 \
+        glib-2.0 \
+        perl-base \
+        uuid-dev \
+        heimdal-dev \
+        bison \
         xsltproc \
+        gnutls-bin \
     -yq && \
     pip3 install lxml && \
-    apt-get purge software-properties-common -yq && \
-    apt autoremove -yq && \
-    rm -rf /var/lib/apt/lists/*
-    
-# Install OpenVAS components
-RUN apt-get update && \
-    apt-get install software-properties-common --no-install-recommends -yq && \
-    add-apt-repository ppa:mrazavi/openvas -y && \
-    apt-get clean && \
-    apt-get update && \
-    apt-get install libopenvas9-dev \
-        openssh-client \
-        openvas9-scanner \
-        openvas9-cli \
-        openvas9-manager \
-    -yq && \
-    apt autoremove -yq && \
     rm -rf /var/lib/apt/lists/*
 
-# Fix for error: 'Directory renamed before its status could be extracted'.
-RUN export tar='bsdtar'
+# Build Greenbone Vulnerability Manager Libs
+RUN curl -sL https://github.com/greenbone/gvm-libs/archive/v${GVM_LIBS_VERSION}.zip -o gvm-libs.zip && \
+    unzip -o gvm-libs.zip -d /tmp && \
+    mkdir -p /tmp/gvm-libs-${GVM_LIBS_VERSION}/build && \
+    cd /tmp/gvm-libs-${GVM_LIBS_VERSION}/build && \
+    cmake .. && \
+    make && \
+    make install && \
+    rm -f /gvm-libs.zip && \
+    rm -rf /tmp/gvm-libs-${GVM_LIBS_VERSION}
 
-# Install Arachni
-RUN wget -q https://github.com/Arachni/arachni/releases/download/v1.5.1/arachni-1.5.1-0.5.12-linux-x86_64.tar.gz && \
-    tar -zxf arachni-1.5.1-0.5.12-linux-x86_64.tar.gz && \
-    mv arachni-1.5.1-0.5.12 /opt/arachni && \
-    ln -s /opt/arachni/bin/* /usr/local/bin/ && \
-    rm -rf arachni*
+RUN export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:'/usr/local/lib' && \
+    ldconfig
 
-# Copy scrips and configuration
+# Build OpenVAS SMB
+RUN curl -sL https://github.com/greenbone/openvas-smb/archive/v${OPENVAS_SMB_VERSION}.zip -o openvas-smb.zip && \
+    unzip -o openvas-smb.zip -d /tmp && \
+    mkdir mkdir -p /tmp/openvas-smb-${OPENVAS_SMB_VERSION}/build && \
+    cd /tmp/openvas-smb-${OPENVAS_SMB_VERSION}/build && \
+    cmake .. && \
+    make && \
+    make install && \
+    rm -f /openvas-smb.zip && \
+    rm -rf /tmp/openvas-smb-${OPENVAS_SMB_VERSION}
+
+# Build OpenVAS Scanner
+RUN curl -sL https://github.com/greenbone/openvas/archive/v${OPENVAS_VERSION}.zip -o openvas.zip && \
+    unzip -o openvas.zip -d /tmp && \
+    mkdir mkdir -p /tmp/openvas-${OPENVAS_VERSION}/build && \
+    cd /tmp/openvas-${OPENVAS_VERSION}/build && \
+    cmake .. && \
+    make && \
+    make install && \
+    cp -f /tmp/openvas-${OPENVAS_VERSION}/config/redis-openvas.conf /etc/redis/redis.conf && \
+    rm -f /openvas.zip && \
+    rm -rf /tmp/openvas-${OPENVAS_VERSION}
+
+# Build Greenbone Vulnerability Manager
+RUN curl -sL https://github.com/greenbone/gvmd/archive/v${GVMD_VERSION}.zip -o gvmd.zip && \
+    unzip -o gvmd.zip -d /tmp && \
+    mkdir mkdir -p /tmp/gvmd-${GVMD_VERSION}/build && \
+    cd /tmp/gvmd-${GVMD_VERSION}/build && \
+    cmake .. && \
+    make && \
+    make install && \
+    rm -f /gvmd.zip && \
+    rm -rf /tmp/gvmd-${GVMD_VERSION}
+
+# Install Impacket
+RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
+    cd impacket/ && \
+    python setup.py install && \
+    rm -rf /impacket
+
+# Copy scripts and configuration
 COPY scripts/start /start
 COPY scripts/update /update
+COPY scripts/create /create
 COPY scripts/scan.py scan.py
-COPY configs/redis.conf /etc/redis/redis.conf
+COPY configs/greenbone-nvt-sync /usr/local/bin/greenbone-nvt-sync
 COPY configs/openvassd.conf /etc/openvas/openvassd.conf
+COPY configs/redis.conf /etc/redis/redis.conf
 
-# Create directories and set files permissions
-RUN mkdir -p /var/run/redis && \
-    mkdir reports && \
+# Create directories, set permissions and change configuration
+RUN mkdir reports && \
     chmod 777 reports && \
     chmod +x /start && \
     chmod +x /update && \
+    chmod +x /create && \
     chmod +x scan.py && \
-    sed -i 's/DAEMON_ARGS=""/DAEMON_ARGS="-a 0.0.0.0"/' /etc/init.d/openvas-manager
+    chmod +x /usr/local/bin/greenbone-nvt-sync && \
+    echo "net.core.somaxconn = 1024"  >> /etc/sysctl.conf && \
+    echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
 
-# Copy existing feeds data for faster update.
-COPY --from=0 /var/lib/openvas /var/lib/openvas
+# Create Postgres database and user
+RUN /etc/init.d/postgresql start && \
+    sudo -u postgres createuser -DRS root && \
+    sudo -u postgres createdb -O root gvmd && \
+    sudo -u postgres psql gvmd -c 'create role dba with superuser noinherit;' && \
+    sudo -u postgres psql gvmd -c 'grant dba to root;' && \
+    sudo -u postgres psql gvmd -c 'create extension "uuid-ossp";'
+
+# Create GVMD user
+RUN bash /create && rm -f /create
 
 # Update OpenVAS
-RUN bash /update && \
-    service openvas-scanner stop && \
-    service openvas-manager stop && \
-    service redis-server stop
+RUN bash /update

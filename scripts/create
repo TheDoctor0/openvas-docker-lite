@@ -1,0 +1,26 @@
+#!/bin/bash
+echo "Starting Redis server..."
+redis-server /etc/redis/redis.conf
+
+echo "Testing redis status..."
+X="$(redis-cli ping)"
+while  [ "${X}" != "PONG" ]
+do
+  echo "Redis not yet ready..."
+  sleep 1
+  X="$(redis-cli ping)"
+done
+echo "Redis ready."
+
+echo "Starting PostgreSQL..."
+/etc/init.d/postgresql start
+echo "PostgreSQL ready."
+
+echo "Creating certificates..."
+gvm-manage-certs -a
+echo "Certificates created."
+
+echo "Creating user..."
+gvmd --create-user=admin
+gvmd --user=admin --new-password=admin
+echo "User created."
