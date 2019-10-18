@@ -107,7 +107,7 @@ RUN adduser service --gecos "service,service,service,service" --disabled-passwor
 # Get data from community feed
 RUN redis-server /etc/redis/redis.conf && \
     chmod +x /usr/local/bin/greenbone-nvt-sync && \
-    su - service -c greenbone-nvt-sync
+    greenbone-nvt-sync
 
 # Build Greenbone Vulnerability Manager
 RUN cd ${SRC_PATH}/gvmd-* && \
