@@ -1,24 +1,26 @@
 FROM debian:buster
 
-ENV GVM_LIBS_VERSION '11.0.0'
-ENV GVMD_VERSION '9.0.0'
-ENV OPENVAS_VERSION '7.0.0'
-ENV OPENVAS_SMB_VERSION '1.0.5'
+ENV GVM_LIBS_VERSION='11.0.0' \
+    GVMD_VERSION='9.0.0' \
+    OPENVAS_VERSION='7.0.0' \
+    OPENVAS_SMB_VERSION='1.0.5' \
+    SRC_PATH='/src' \
+    DEBIAN_FRONTEND=noninteractive \
+    TERM=dumb
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TERM dumb
-
+# Install dependencies
 RUN apt-get update && \
     apt-get install \
         postgresql \
         postgresql-contrib \
         postgresql-server-dev-all \
         python-setuptools \
-        curl \
-        unzip \
         git \
-        python3-pip \
+        curl \
         python3 \
+        python3-pip \
+        python-pip \
+        python-dev \
         rsync \
         nmap \
         snmp \
@@ -47,71 +49,90 @@ RUN apt-get update && \
         xsltproc \
         gnutls-bin \
     -yq && \
-    pip3 install lxml && \
+    apt-get install texlive-latex-extra --no-install-recommends -yq && \
+    apt-get install texlive-fonts-recommended -yq && \
     rm -rf /var/lib/apt/lists/*
 
+# Install python libraries
+RUN pip3 install lxml && \
+    pip3 install gvm-tools && \
+    pip3 install paramiko && \
+    pip3 install defusedxml && \
+    pip3 install ospd
+
+# Download and extract sources
+RUN mkdir ${SRC_PATH} -p && \
+    cd ${SRC_PATH} && \
+    curl -o gvm-libs.tar.gz -sL https://github.com/greenbone/gvm-libs/archive/v${GVM_LIBS_VERSION}.tar.gz && \
+    curl -o openvas.tar.gz -sL https://github.com/greenbone/openvas/archive/v${OPENVAS_VERSION}.tar.gz && \
+    curl -o gvmd.tar.gz -sL https://github.com/greenbone/gvmd/archive/v${GVMD_VERSION}.tar.gz && \
+    curl -o openvas-smb.tar.gz -sL https://github.com/greenbone/openvas-smb/archive/v${OPENVAS_SMB_VERSION}.tar.gz && \
+    find . -name \*.gz -exec tar zxvfp {} \;
+
 # Build Greenbone Vulnerability Manager Libs
-RUN curl -sL https://github.com/greenbone/gvm-libs/archive/v${GVM_LIBS_VERSION}.zip -o gvm-libs.zip && \
-    unzip -o gvm-libs.zip -d /tmp && \
-    mkdir -p /tmp/gvm-libs-${GVM_LIBS_VERSION}/build && \
-    cd /tmp/gvm-libs-${GVM_LIBS_VERSION}/build && \
+RUN cd ${SRC_PATH}/gvm-libs-* && \
+    mkdir build && \
+    cd build && \
     cmake .. && \
     make && \
     make install && \
-    rm -f /gvm-libs.zip && \
-    rm -rf /tmp/gvm-libs-${GVM_LIBS_VERSION}
+    rm -rf ${SRC_PATH}/gvm-libs-*
 
-RUN export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:'/usr/local/lib' && \
-    ldconfig
-
-# Build OpenVAS SMB
-RUN curl -sL https://github.com/greenbone/openvas-smb/archive/v${OPENVAS_SMB_VERSION}.zip -o openvas-smb.zip && \
-    unzip -o openvas-smb.zip -d /tmp && \
-    mkdir mkdir -p /tmp/openvas-smb-${OPENVAS_SMB_VERSION}/build && \
-    cd /tmp/openvas-smb-${OPENVAS_SMB_VERSION}/build && \
+# Build OpenVAS SMB module
+RUN cd ${SRC_PATH}/openvas-smb-* && \
+    mkdir build && \
+    cd build && \
     cmake .. && \
     make && \
     make install && \
-    rm -f /openvas-smb.zip && \
-    rm -rf /tmp/openvas-smb-${OPENVAS_SMB_VERSION}
+    rm -rf ${SRC_PATH}/openvas-smb-*
 
 # Build OpenVAS Scanner
-RUN curl -sL https://github.com/greenbone/openvas/archive/v${OPENVAS_VERSION}.zip -o openvas.zip && \
-    unzip -o openvas.zip -d /tmp && \
-    mkdir mkdir -p /tmp/openvas-${OPENVAS_VERSION}/build && \
-    cd /tmp/openvas-${OPENVAS_VERSION}/build && \
+RUN cd ${SRC_PATH}/openvas-* && \
+    mkdir build && \
+    cd build && \
     cmake .. && \
     make && \
     make install && \
-    cp -f /tmp/openvas-${OPENVAS_VERSION}/config/redis-openvas.conf /etc/redis/redis.conf && \
-    rm -f /openvas.zip && \
-    rm -rf /tmp/openvas-${OPENVAS_VERSION}
+    rm -rf ${SRC_PATH}/openvas-*
+
+# Copy scripts and configuration
+COPY configs/greenbone-nvt-sync /usr/local/bin/greenbone-nvt-sync
+COPY configs/redis.conf /etc/redis/redis.conf
+
+# Get data from community feed
+RUN redis-server /etc/redis/redis.conf && \
+    chmod +x /usr/local/bin/greenbone-nvt-sync && \
+    greenbone-nvt-sync
 
 # Build Greenbone Vulnerability Manager
-RUN curl -sL https://github.com/greenbone/gvmd/archive/v${GVMD_VERSION}.zip -o gvmd.zip && \
-    unzip -o gvmd.zip -d /tmp && \
-    mkdir mkdir -p /tmp/gvmd-${GVMD_VERSION}/build && \
-    cd /tmp/gvmd-${GVMD_VERSION}/build && \
+RUN cd ${SRC_PATH}/gvmd-* && \
+    mkdir build && \
+    cd build && \
     cmake .. && \
     make && \
     make install && \
-    rm -f /gvmd.zip && \
-    rm -rf /tmp/gvmd-${GVMD_VERSION}
+    rm -rf ${SRC_PATH}/gvmd-*
+
+# Update kernel modules and sync scap/cert data
+RUN export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:'/usr/local/lib' && \
+    ldconfig && \
+    greenbone-scapdata-sync && \
+    greenbone-certdata-sync
 
 # Install Impacket
 RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
     cd impacket/ && \
-    python setup.py install && \
-    rm -rf /impacket
+    pip install . && \
+    cd ../ && \
+    rm -rf impacket
 
 # Copy scripts and configuration
 COPY scripts/start /start
 COPY scripts/update /update
 COPY scripts/create /create
 COPY scripts/scan.py scan.py
-COPY configs/greenbone-nvt-sync /usr/local/bin/greenbone-nvt-sync
 COPY configs/openvassd.conf /etc/openvas/openvassd.conf
-COPY configs/redis.conf /etc/redis/redis.conf
 
 # Create directories, set permissions and change configuration
 RUN mkdir reports && \
@@ -120,7 +141,6 @@ RUN mkdir reports && \
     chmod +x /update && \
     chmod +x /create && \
     chmod +x scan.py && \
-    chmod +x /usr/local/bin/greenbone-nvt-sync && \
     echo "net.core.somaxconn = 1024"  >> /etc/sysctl.conf && \
     echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
 
@@ -134,6 +154,3 @@ RUN /etc/init.d/postgresql start && \
 
 # Create GVMD user
 RUN bash /create && rm -f /create
-
-# Update OpenVAS
-RUN bash /update

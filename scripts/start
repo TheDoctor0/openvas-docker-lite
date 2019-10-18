@@ -16,27 +16,15 @@ echo "Starting PostgreSQL..."
 /etc/init.d/postgresql start
 echo "PostgreSQL ready."
 
-echo "Starting OpenVAS Scanner..."
-ldconfig && openvas
-sleep 2
-X="$(ps aufx | grep openvas | grep -v 'grep')"
-while  [ "${#X}" == 0 ]; do
-        echo "OpenVAS Scanner not yet ready..."
-        ldconfig && openvas
-        sleep 2
-        X="$(ps aufx | grep openvas | grep -v 'grep')"
-done
-echo "OpenVAS Scanner ready."
-
 echo "Starting GVMD..."
-ldconfig && gvmd
+gvmd
 echo "Testing GVMD status..."
-sleep 1
+sleep 3
 X="$(ps | grep gvmd)"
 while  [ "${#X}" == 0 ]; do
         echo "GVMD not yet ready..."
-        ldconfig && gvmd
-        sleep 1
+        gvmd
+        sleep 3
         X="$(ps | grep gvmd)"
 done
 echo "GVMD ready."
