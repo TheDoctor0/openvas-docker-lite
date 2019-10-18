@@ -17,7 +17,7 @@ echo "Starting PostgreSQL..."
 echo "PostgreSQL ready."
 
 echo "Syncing OpenVAS feeds..."
-greenbone-nvt-sync --curl --verbose
+greenbone-nvt-sync
 greenbone-scapdata-sync
 greenbone-certdata-sync
 echo "OpenVAS feeds synced."
