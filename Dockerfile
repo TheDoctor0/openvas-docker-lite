@@ -96,14 +96,17 @@ RUN cd ${SRC_PATH}/openvas-* && \
     make install && \
     rm -rf ${SRC_PATH}/openvas-*
 
-# Copy scripts and configuration
-COPY configs/greenbone-nvt-sync /usr/local/bin/greenbone-nvt-sync
+# Override redis configuration
 COPY configs/redis.conf /etc/redis/redis.conf
+
+# Add dummy user
+RUN adduser admin --gecos "admin,admin,admin,admin" --disabled-password && \
+    echo "admin:admin" | sudo chpasswd
 
 # Get data from community feed
 RUN redis-server /etc/redis/redis.conf && \
     chmod +x /usr/local/bin/greenbone-nvt-sync && \
-    greenbone-nvt-sync
+    su - admin -c greenbone-nvt-sync
 
 # Build Greenbone Vulnerability Manager
 RUN cd ${SRC_PATH}/gvmd-* && \

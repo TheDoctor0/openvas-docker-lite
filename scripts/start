@@ -17,14 +17,14 @@ echo "Starting PostgreSQL..."
 echo "PostgreSQL ready."
 
 echo "Starting GVMD..."
-gvmd
+gvmd --listen-group=admin --listen-owner=admin
 echo "Testing GVMD status..."
-sleep 3
+sleep 1
 X="$(ps | grep gvmd)"
 while  [ "${#X}" == 0 ]; do
         echo "GVMD not yet ready..."
-        gvmd
-        sleep 3
+        gvmd --listen-group=admin --listen-owner=admin
+        sleep 1
         X="$(ps | grep gvmd)"
 done
 echo "GVMD ready."
