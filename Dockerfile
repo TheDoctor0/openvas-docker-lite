@@ -96,8 +96,9 @@ RUN cd ${SRC_PATH}/openvas-* && \
     make install && \
     rm -rf ${SRC_PATH}/openvas-*
 
-# Override redis configuration
+# Override redis configuration and greenbone sync script
 COPY configs/redis.conf /etc/redis/redis.conf
+COPY scripts/greenbone-nvt-sync /usr/local/bin/greenbone-nvt-sync
 
 # Add dummy user
 RUN adduser service --gecos "service,service,service,service" --disabled-password && \
