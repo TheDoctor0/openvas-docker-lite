@@ -100,13 +100,13 @@ RUN cd ${SRC_PATH}/openvas-* && \
 COPY configs/redis.conf /etc/redis/redis.conf
 
 # Add dummy user
-RUN adduser admin --gecos "admin,admin,admin,admin" --disabled-password && \
-    echo "admin:admin" | sudo chpasswd
+RUN adduser service --gecos "service,service,service,service" --disabled-password && \
+    echo "service:service" | sudo chpasswd
 
 # Get data from community feed
 RUN redis-server /etc/redis/redis.conf && \
     chmod +x /usr/local/bin/greenbone-nvt-sync && \
-    su - admin -c greenbone-nvt-sync
+    su - service -c greenbone-nvt-sync
 
 # Build Greenbone Vulnerability Manager
 RUN cd ${SRC_PATH}/gvmd-* && \

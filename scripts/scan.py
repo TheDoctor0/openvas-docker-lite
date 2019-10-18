@@ -8,7 +8,8 @@ import os
 
 
 def get_output(command):
-    command = "su - admin -c \"gvm-cli --gmp-username admin --gmp-password admin socket --xml \'{}\'\"".format(command)
+    command = "su - service -c \"gvm-cli --gmp-username service --gmp-password " + \
+              "service socket --xml \'{}\'\"".format(command)
 
     return subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
 
