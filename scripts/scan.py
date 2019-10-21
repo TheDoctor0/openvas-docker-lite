@@ -5,6 +5,7 @@ from typing import Union
 from typing import List
 from typing import Dict
 from typing import Set
+from typing import IO
 from lxml import etree
 import subprocess
 import argparse
@@ -58,7 +59,7 @@ alive_tests: Set[str] = {
 
 def save_report(path: str, report: str) -> None:
     """Save raw OpenVAS report to specified file."""
-    file = open(path, 'w')
+    file: IO[str] = open(path, 'w')
     file.write(report)
     file.close()
 
