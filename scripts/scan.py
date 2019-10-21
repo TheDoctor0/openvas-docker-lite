@@ -133,7 +133,6 @@ else:
     print("Starting OpenVAS...")
     with open(os.devnull, 'w') as devnull:
         subprocess.check_call(["/start"], shell=True, stdout=devnull)
-        subprocess.check_call(["openvas -u"], shell=True, stdout=devnull)
 
 print("Starting scan with settings:")
 print("* Target: {}".format(args.target))

@@ -16,6 +16,10 @@ echo "Starting PostgreSQL..."
 /etc/init.d/postgresql start
 echo "PostgreSQL ready."
 
+echo "Rebuilding NVT cache..."
+openvas -u
+echo "NVT cache ready."
+
 echo "Starting GVMD..."
 gvmd --listen-group=admin --listen-owner=admin
 echo "Testing GVMD status..."
