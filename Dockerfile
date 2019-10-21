@@ -136,7 +136,7 @@ COPY scripts/start /start
 COPY scripts/update /update
 COPY scripts/create /create
 COPY scripts/scan.py scan.py
-COPY configs/openvas.conf /etc/openvas/openvas.conf
+COPY configs/openvas.conf /usr/local/etc/openvas/openvas.conf
 
 # Create directories, set permissions and change configuration
 RUN mkdir reports && \

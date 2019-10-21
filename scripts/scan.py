@@ -115,12 +115,12 @@ if args.checks is not None:
 
 with open(os.devnull, 'w') as devnull:
     subprocess.check_call(
-        ["sed -i 's/max_hosts.*/max_hosts = " + str(max_hosts) + "/' /etc/openvas/openvassd.conf"],
+        ["sed -i 's/max_hosts.*/max_hosts = " + str(max_hosts) + "/' /usr/local/etc/openvas/openvas.conf"],
         shell=True,
         stdout=devnull
     )
     subprocess.check_call(
-        ["sed -i 's/max_checks.*/max_checks = " + str(max_checks) + "/' /etc/openvas/openvassd.conf"],
+        ["sed -i 's/max_checks.*/max_checks = " + str(max_checks) + "/' /usr/local/etc/openvas/openvas.conf"],
         shell=True,
         stdout=devnull
     )
