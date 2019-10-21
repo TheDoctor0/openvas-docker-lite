@@ -23,13 +23,13 @@ greenbone-certdata-sync
 echo "OpenVAS feeds synced."
 
 echo "Starting GVMD..."
-gvmd --listen-group=admin --listen-owner=admin
+gvmd --listen-group=service --listen-owner=service
 echo "Testing GVMD status..."
 sleep 1
 X="$(ps | grep gvmd)"
 while  [ "${#X}" == 0 ]; do
         echo "GVMD not yet ready..."
-        gvmd --listen-group=admin --listen-owner=admin
+        gvmd --listen-group=service --listen-owner=service
         sleep 1
         X="$(ps | grep gvmd)"
 done
