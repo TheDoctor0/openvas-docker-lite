@@ -20,14 +20,17 @@ echo "Rebuilding NVT cache..."
 openvas -u
 echo "NVT cache ready."
 
+echo "Starting OSPD..."
+ospd-openvas -l /usr/local/var/log/gvm/gvmd.log -u /tmp/ospd.sock &
+echo "OSPD ready."
+
 echo "Starting GVMD..."
 gvmd --listen-group=service --listen-owner=service
 echo "Testing GVMD status..."
 sleep 1
-X="$(ps | grep gvmd)"
+X="$(ps -aux | grep gvmd)"
 while  [ "${#X}" == 0 ]; do
         echo "GVMD not yet ready..."
-        gvmd --listen-group=service --listen-owner=service
         sleep 1
         X="$(ps | grep gvmd)"
 done

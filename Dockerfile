@@ -58,7 +58,8 @@ RUN pip3 install lxml && \
     pip3 install gvm-tools && \
     pip3 install paramiko && \
     pip3 install defusedxml && \
-    pip3 install ospd
+    pip3 install ospd && \
+    pip3 install ospd-openvas
 
 # Download and extract sources
 RUN mkdir ${SRC_PATH} -p && \
