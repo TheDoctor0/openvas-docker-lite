@@ -22,6 +22,10 @@ greenbone-scapdata-sync
 greenbone-certdata-sync
 echo "OpenVAS feeds synced."
 
+echo "Starting OSPD..."
+ospd-openvas -l /usr/local/var/log/gvm/gvmd.log -u /tmp/ospd.sock &
+echo "OSPD ready."
+
 echo "Starting GVMD..."
 gvmd --listen-group=service --listen-owner=service
 echo "Testing GVMD status..."
