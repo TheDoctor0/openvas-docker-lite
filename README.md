@@ -1,10 +1,10 @@
 # OpenVAS Docker Lite [![Build Status](https://travis-ci.org/TheDoctor0/openvas-docker-lite.png)](https://travis-ci.org/TheDoctor0/openvas-docker-lite) [![Docker Pulls](https://img.shields.io/docker/pulls/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite) [![Docker Stars](https://img.shields.io/docker/stars/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite) [![](https://images.microbadger.com/badges/image/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite)
 
-A Docker container with OpenVAS 10 based on the Debian 10 image.
+Docker container with automated OpenVAS 10 based on the Debian 10 image.
 
-It also contains custom automation script that allows to scan selected targets and generate a report with one command.
+It contains custom automation script that allows to scan selected targets and generate a report with one command.
 
-It is lite version and it does not contain Greenbone Security Assistant - web app for managing OpenVAS.
+This is a lite version and it does not include Greenbone Security Assistant - web app for managing OpenVAS.
 
 ## Usage
 
@@ -106,7 +106,7 @@ By default **10** is used as *max_checks* variable value.
 
 #### Debug
 
-You can enable printing OMP command responses and OpenVAS logs by adding **--debug** argument.
+You can enable printing command responses by adding **--debug** argument.
 
 #### Update
 
@@ -114,7 +114,7 @@ You can also add **--update** argument to force update.
 
 This will synchronize OpenVAS feeds before making the scan.
 
-Feeds update is slow, so it will take significantly more time.
+Feeds update is quite slow, so it will take significantly more time.
 
 ## Credits
 - Mike Splain for creating the original OpenVAS docker image
