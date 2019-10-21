@@ -81,8 +81,8 @@ def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, flo
     """Execute gvmd command and return its output (optionally xpath can be used to get nested XML element)."""
     global debug
 
-    command: str = "su - service -c \"gvm-cli --gmp-username service --gmp-password " + \
-                   "service socket --xml \'{}\'\"".format(command)
+    command: str = "su - service -c \"gvm-cli --gmp-username admin --gmp-password admin " \
+                   "socket --xml \'{}\'\"".format(command)
 
     response: str = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
 
@@ -92,20 +92,20 @@ def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, flo
     return etree.XML(response).xpath(xpath) if xpath else response
 
 
-def make_scan(target: str, exclude: str, tests: str, profile: str, report_format: str, report_file: str) -> None:
+def make_scan(scan: Dict[str, str]) -> None:
     """Make automated OpenVAS scan and save generated report."""
     perform_cleanup()
-    print("\nPerformed initial cleanup.")
+    print("Performed initial cleanup.")
 
-    command: str = r"<create_target><name>scan</name><hosts>{}</hosts>".format(target) + \
-                   r"<exclude_hosts>{}</exclude_hosts>".format(exclude) + \
-                   r"<alive_tests>{}</alive_tests></create_target>".format(tests)
+    command: str = r"<create_target><name>scan</name><hosts>{}</hosts>".format(scan['target']) + \
+                   r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
+                   r"<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
     target_id: str = execute_command(command, "//create_target_response")[0].get("id")
     print("Created target with id: {}.".format(target_id))
 
     command = r"<create_task><name>scan</name>" + \
               r"<target id=\"{}\"></target>".format(target_id) + \
-              r"<config id=\"{}\"></config></create_task>".format(profile)
+              r"<config id=\"{}\"></config></create_task>".format(scan['profile'])
     task_id: str = execute_command(command, "//create_task_response")[0].get("id")
     print("Created task with id: {}.".format(task_id))
 
@@ -132,65 +132,31 @@ def make_scan(target: str, exclude: str, tests: str, profile: str, report_format
             print("ERROR: ", exc.output)
 
     report_id: str = etree.XML(task).xpath("//report")[0].get("id")
-    report: str = execute_command(r"<get_reports report_id=\"{}\" format_id=\"{}\"/>".format(report_id, report_format))
+    report: str = execute_command(r"<get_reports report_id=\"{}\" format_id=\"{}\"/>".format(report_id, scan['format']))
     print("Generated report.")
 
-    save_report(report_file, report)
-    print("Saved report to {}.".format(report_file))
+    save_report(scan['output'], report)
+    print("Saved report to {}.".format(scan['output']))
 
     perform_cleanup()
     print("Done!")
 
 
-def override_settings(args: argparse.Namespace) -> None:
+def start_scan(args: argparse.Namespace) -> None:
     """Override default settings and start scan."""
     global debug
-
-    scan_profile: str = "Full and fast"
-    report_format: str = "ARF"
-    alive_test: str = "ICMP, TCP-ACK Service & ARP Ping"
-    report_file: str = "openvas.report"
-    max_hosts: int = 1
-    max_checks: int = 10
-
-    if args.profile is not None:
-        if args.profile in scan_profiles:
-            scan_profile = args.profile
-        else:
-            print("{} is not a valid option for profile! Using default: {}.".format(args.profile, scan_profile))
-
-    if args.tests is not None:
-        if args.tests in alive_tests:
-            alive_test = args.tests
-        else:
-            print("{} is not valid option for alive tests! Using default: {}.".format(args.tests, alive_test))
-
-    if args.format is not None:
-        if args.format in report_formats:
-            report_format = args.format
-        else:
-            print("{} is not a valid option for report format! Using default: {}.".format(args.format, report_format))
-
-    if args.output is not None:
-        report_file = args.output
-
-    if args.max is not None:
-        max_hosts = args.max
-
-    if args.checks is not None:
-        max_checks = args.checks
 
     if args.debug:
         debug = True
 
     with open(os.devnull, 'w') as devnull:
         subprocess.check_call(
-            ["sed -i 's/max_hosts.*/max_hosts = " + str(max_hosts) + "/' /usr/local/etc/openvas/openvas.conf"],
+            ["sed -i 's/max_hosts.*/max_hosts = " + str(args.hosts) + "/' /usr/local/etc/openvas/openvas.conf"],
             shell=True,
             stdout=devnull
         )
         subprocess.check_call(
-            ["sed -i 's/max_checks.*/max_checks = " + str(max_checks) + "/' /usr/local/etc/openvas/openvas.conf"],
+            ["sed -i 's/max_checks.*/max_checks = " + str(args.checks) + "/' /usr/local/etc/openvas/openvas.conf"],
             shell=True,
             stdout=devnull
         )
@@ -207,33 +173,85 @@ def override_settings(args: argparse.Namespace) -> None:
     print("Starting scan with settings:")
     print("* Target: {}".format(args.target))
     print("* Excluded hosts: {}".format(args.exclude))
-    print("* Scan profile: {}".format(scan_profile))
-    print("* Alive tests: {}".format(alive_test))
-    print("* Max hosts: {}".format(max_hosts))
-    print("* Max checks: {}".format(max_checks))
-    print("* Report format: {}".format(report_format))
-    print("* Output file: {}".format(report_file))
+    print("* Scan profile: {}".format(args.profile))
+    print("* Alive tests: {}".format(args.tests))
+    print("* Max hosts: {}".format(args.hosts))
+    print("* Max checks: {}".format(args.checks))
+    print("* Report format: {}".format(args.format))
+    print("* Output file: {}\n".format(args.output))
 
-    make_scan(args.target, args.exclude, alive_test.replace("&", "&amp;"), scan_profiles[scan_profile],
-              report_formats[report_format], "/reports/" + report_file)
+    make_scan({'target': args.target, 'exclude': args.exclude, 'tests': args.tests.replace("&", "&amp;"),
+               'profile': scan_profiles[args.profile], 'format': report_formats[args.format],
+               'output': "/reports/" + args.output})
+
+
+def report_format(arg: Optional[str]) -> str:
+    if arg not in report_formats:
+        raise argparse.ArgumentTypeError("Specified report format is invalid!")
+
+    return arg
+
+
+def scan_profile(arg: Optional[str]) -> str:
+    if arg not in scan_profiles:
+        raise argparse.ArgumentTypeError("Specified scan profile is invalid!")
+
+    return arg
+
+
+def alive_test(arg: Optional[str]) -> str:
+    if arg not in alive_tests:
+        raise argparse.ArgumentTypeError("Specified alive tests are invalid!")
+
+    return arg
+
+
+def max_hosts(arg: Optional[str]) -> int:
+    try:
+        value = int(arg)
+
+        if value <= 0:
+            raise ValueError
+    except ValueError:
+        raise argparse.ArgumentTypeError("Specified maximum number of simultaneous tested hosts is invalid!")
+
+    return value
+
+
+def max_checks(arg: Optional[str]) -> int:
+    try:
+        value = int(arg)
+
+        if value <= 0:
+            raise ValueError
+    except ValueError:
+        raise argparse.ArgumentTypeError("Specified maximum number of simultaneous checks against hosts is invalid!")
+
+    return value
 
 
 def parse_arguments():
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description='Run OpenVAS scan with specified target and save report.')
     parser.add_argument('target', help='scan target')
-    parser.add_argument('-o', '--output', help='output file (default: openvas.report)', required=False)
-    parser.add_argument('-f', '--format', help='format for report (default: ARF)', required=False)
-    parser.add_argument('-p', '--profile', help='scan profile (default: Full and fast)', required=False)
-    parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK Service & ARP Ping)', required=False)
-    parser.add_argument('-e', '--exclude', help='hosts excluded from scan target', required=False)
-    parser.add_argument('-m', '--max', help='maximum number of simultaneous hosts tested', type=int, required=False)
-    parser.add_argument('-c', '--checks', help='maximum number of simultaneous checks against each tested host',
-                        type=int, required=False)
-    parser.add_argument('--update', help='synchronize feeds before scan is started', nargs='?', const=True,
-                        default=False, required=False)
-    parser.add_argument('--debug', help='enable command responses printing', nargs='?', const=True, default=False,
-                        required=False)
+    parser.add_argument('-o', '--output', help='output file (default: openvas.report)',
+                        default="openvas.report", required=False)
+    parser.add_argument('-f', '--format', help='format for report (default: ARF)',
+                        default="ARF", type=report_format, required=False)
+    parser.add_argument('-p', '--profile', help='scan profile (default: Full and fast)',
+                        default="Full and fast", type=scan_profile, required=False)
+    parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK Service & ARP Ping)',
+                        default="ICMP, TCP-ACK Service & ARP Ping", type=alive_test, required=False)
+    parser.add_argument('-e', '--exclude', help='hosts excluded from scan target (Default: "")',
+                        default="", required=False)
+    parser.add_argument('-m', '--hosts', help='maximum number of simultaneous tested hosts (Default: 3)',
+                        type=max_hosts, default=3, required=False)
+    parser.add_argument('-c', '--checks', help='maximum number of simultaneous checks against each host (Default: 10)',
+                        type=max_checks, default=10, required=False)
+    parser.add_argument('--update', help='synchronize feeds before scanning',
+                        nargs='?', const=True, default=False, required=False)
+    parser.add_argument('--debug', help='enable command responses printing',
+                        nargs='?', const=True, default=False, required=False)
 
     return parser.parse_args()
 
@@ -241,4 +259,4 @@ def parse_arguments():
 if __name__ == '__main__':
     arguments: argparse.Namespace = parse_arguments()
 
-    override_settings(arguments)
+    start_scan(arguments)
