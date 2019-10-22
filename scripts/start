@@ -23,11 +23,11 @@ echo "OSPD ready."
 echo "Starting GVMD..."
 gvmd --listen-group=service --listen-owner=service --osp-vt-update=/run/ospd.sock
 echo "Testing GVMD status..."
-sleep 1
-X="$(ps -aux | grep gvmd)"
+sleep 3
+X="$(ps -aux | grep '[g]vmd')"
 while  [ "${#X}" == 0 ]; do
         echo "GVMD not yet ready..."
-        sleep 1
+        sleep 3
         X="$(ps | grep gvmd)"
 done
 echo "GVMD ready."
