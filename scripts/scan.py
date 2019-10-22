@@ -84,10 +84,13 @@ def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, flo
     command: str = "su - service -c \"gvm-cli --gmp-username admin --gmp-password admin " \
                    "socket --xml \'{}\'\"".format(command)
 
+    if debug:
+        print("[DEBUG] Command: {}".format(command))
+
     response: str = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
 
     if debug:
-        print("Response: {}".format(response))
+        print("[DEBUG] Response: {}".format(response))
 
     return etree.XML(response).xpath(xpath) if xpath else response
 
@@ -100,13 +103,20 @@ def make_scan(scan: Dict[str, str]) -> None:
     command: str = r"<create_target><name>scan</name><hosts>{}</hosts>".format(scan['target']) + \
                    r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
                    r"<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
-    target_id: str = execute_command(command, "//create_target_response")[0].get("id")
+    target_id: str = execute_command(command, "string(//create_target_response/@id)")
     print("Created target with id: {}.".format(target_id))
 
-    command = r"<create_task><name>scan</name>" + \
+    scanner_id: str = execute_command(
+        r"<get_scanners filter=\"Scanner\"/>",
+        "string(//get_scanners_response/scanner/@id)"
+    )
+    print("Found scanner with id: {}.".format(scanner_id))
+
+    command = r"<create_task><name>Scan</name>" + \
               r"<target id=\"{}\"></target>".format(target_id) + \
+              r"<scanner id=\"{}\"></scanner>".format(scanner_id) + \
               r"<config id=\"{}\"></config></create_task>".format(scan['profile'])
-    task_id: str = execute_command(command, "//create_task_response")[0].get("id")
+    task_id: str = execute_command(command, "string(//create_task_response/@id)")
     print("Created task with id: {}.".format(task_id))
 
     execute_command(r"<start_task task_id=\"{}\"/>".format(task_id))
@@ -120,9 +130,11 @@ def make_scan(scan: Dict[str, str]) -> None:
         try:
             time.sleep(5)
 
-            task = execute_command(r"<get_tasks task_id=\"{}\"/>".format(task_id))
-            status = etree.XML(task).xpath("//status")[0].text
-            progress: int = int(etree.XML(task).xpath("//progress")[0].text)
+            task = execute_command(
+                r"<get_tasks task_id=\"{}\" filter=\"apply_overrides=1\" ignore_pagination=\"1\"/>".format(task_id)
+            )
+            status = etree.XML(task).xpath("//status/text()")
+            progress: int = int(etree.XML(task).xpath("string(//progress/text())"))
 
             if progress > 0:
                 print("Task status: {} {}%".format(status, progress))
@@ -131,11 +143,16 @@ def make_scan(scan: Dict[str, str]) -> None:
         except subprocess.CalledProcessError as exc:
             print("ERROR: ", exc.output)
 
-    report_id: str = etree.XML(task).xpath("//report")[0].get("id")
-    report: str = execute_command(r"<get_reports report_id=\"{}\" format_id=\"{}\"/>".format(report_id, scan['format']))
+    report_id: str = etree.XML(task).xpath("string(//report/@id)")
+    report: str = execute_command(
+        r"<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, scan['format']) +
+        r"filter=\"apply_overrides=1 levels=hmlf\" ignore_pagination=\"1\" notes_details=\"1\"/>",
+        "//get_reports_response/report/text()"
+    )
+    print(str(report))
     print("Generated report.")
 
-    save_report(scan['output'], report)
+    save_report(scan['output'], str(report))
     print("Saved report to {}.".format(scan['output']))
 
     perform_cleanup()
