@@ -17,6 +17,7 @@ echo "Starting PostgreSQL..."
 echo "PostgreSQL ready."
 
 echo "Starting OSPD..."
+rm -f /run/ospd.sock /run/ospd.pid
 ospd-openvas -l /usr/local/var/log/gvm/ospd.log --unix-socket /run/ospd.sock --pid-file=/run/ospd.pid &
 echo "OSPD ready."
 
@@ -24,10 +25,11 @@ echo "Starting GVMD..."
 gvmd --listen-group=service --listen-owner=service --osp-vt-update=/run/ospd.sock
 echo "Testing GVMD status..."
 sleep 3
-X="$(ps -aux | grep '[g]vmd')"
+X="$(ps -aux | grep '[g]vmd: Waiting')"
 while  [ "${#X}" == 0 ]; do
-        echo "GVMD not yet ready..."
-        sleep 3
-        X="$(ps | grep gvmd)"
+    echo "GVMD not yet ready..."
+    sleep 3
+    X="$(ps -aux | grep '[g]vmd: Waiting')"
 done
+sleep 3
 echo "GVMD ready."
