@@ -157,5 +157,5 @@ RUN /etc/init.d/postgresql start && \
     sudo -u postgres psql gvmd -c 'grant dba to root;' && \
     sudo -u postgres psql gvmd -c 'create extension "uuid-ossp";'
 
-# Create GVMD user
+# Create user, scanner and sync database
 RUN bash /create && rm -f /create
