@@ -5,6 +5,7 @@ import subprocess
 import argparse
 import base64
 import time
+import os
 from lxml import etree
 from typing import Optional
 from typing import Union
@@ -136,12 +137,14 @@ def make_scan(scan: Dict[str, str]) -> None:
             status = etree.XML(task).xpath("string(//status/text())")
             progress: int = int(etree.XML(task).xpath("string(//progress/text())"))
 
+            os.system("clear")
+
             if progress > 0:
                 print("Task status: {} {}%".format(status, progress))
             else:
                 print("Task status: Complete")
-        except subprocess.CalledProcessError as exc:
-            print("ERROR: ", exc.output)
+        except subprocess.CalledProcessError as exception:
+            print("ERROR: ", exception.output)
 
     report_id: str = etree.XML(task).xpath("string(//report/@id)")
     report: str = execute_command(
