@@ -18,6 +18,6 @@ sleep 1
 X="$(ps -aux | grep -v grep | grep 'postgres: 11/main: startup')"
 while  [ "${#X}" != 0 ]; do
   sleep 1
-  X="$(redis-cli ping)"
+  X="$(ps -aux | grep -v grep | grep 'postgres: 11/main: startup')"
 done
 echo "PostgreSQL ready."
