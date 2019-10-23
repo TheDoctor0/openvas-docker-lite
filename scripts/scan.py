@@ -145,10 +145,9 @@ def make_scan(scan: Dict[str, str]) -> None:
     report_id: str = etree.XML(task).xpath("string(//report/@id)")
     report: str = execute_command(
         r"<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, scan['format']) +
-        r"filter=\"apply_overrides=0\" ignore_pagination=\"1\" notes_details=\"1\"/>",
-        "//get_reports_response/report/text()"
+        r"filter=\"levels=hmlg\" details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>",
+        "string(//get_reports_response/report/text())"
     )
-    print(str(report))
     print("Generated report.")
 
     save_report(scan['output'], str(report))
