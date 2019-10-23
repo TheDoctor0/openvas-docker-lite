@@ -121,7 +121,7 @@ RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
     rm -rf impacket
 
 COPY scripts/start-services /usr/local/bin/start-services
-COPY scripts/start-ospd /usr/local/bin/start-openvas
+COPY scripts/start-openvas /usr/local/bin/start-openvas
 COPY scripts/start-scanner /usr/local/bin/start-scanner
 COPY scripts/update-scanner /usr/local/bin/update-scanner
 COPY scripts/configure-scanner /configure-scanner
