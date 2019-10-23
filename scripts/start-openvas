@@ -24,9 +24,19 @@ while  [ "${#X}" != 0 ]; do
 done
 echo "Plugins pushed to Redis."
 
-echo "Wating for OSPD socket..."
+echo "Waiting for OSPD socket..."
 sleep 5
 while [ ! -e /run/ospd.sock ]; do
   sleep 1
 done
 echo "OSPD socket ready."
+
+# There is a problem with SCAP Sync: https://github.com/greenbone/gvmd/issues/822
+echo "Synchronizing certs and NVT cache..."
+sleep 60
+X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Reloading NVTs')"
+while  [ "${#X}" != 0 ]; do
+    sleep 1
+    X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Reloading NVTs')"
+done
+echo "Certs and NVT cache synchronized."
