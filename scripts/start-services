@@ -1,12 +1,11 @@
 #!/bin/bash
 echo "Starting Redis server..."
 redis-server /etc/redis/redis.conf
-
-echo "Testing redis status..."
+echo "Testing Redis status..."
+sleep 1
 X="$(redis-cli ping)"
 while  [ "${X}" != "PONG" ]
 do
-  echo "Redis not yet ready..."
   sleep 1
   X="$(redis-cli ping)"
 done
@@ -14,4 +13,11 @@ echo "Redis ready."
 
 echo "Starting PostgreSQL..."
 /etc/init.d/postgresql start
+echo "Testing PostgreSQL status..."
+sleep 1
+X="$(ps -aux | grep -v grep | grep 'postgres: 11/main: startup')"
+while  [ "${#X}" != 0 ]; do
+  sleep 1
+  X="$(redis-cli ping)"
+done
 echo "PostgreSQL ready."
