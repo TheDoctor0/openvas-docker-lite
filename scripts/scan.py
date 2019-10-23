@@ -60,7 +60,10 @@ alive_tests: Set[str] = {
 
 def save_report(path: str, raw_report: str, output_format: str = None) -> None:
     """Save OpenVAS report to specified file. Decode from Base64 if not XML."""
-    report = raw_report if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5' else base64.b64decode(raw_report)
+    if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
+        report: str = raw_report
+    else:
+        report: str = base64.b64decode(raw_report).decode('utf-8')
 
     file: IO[str] = open(path, 'w')
     file.write(report)
