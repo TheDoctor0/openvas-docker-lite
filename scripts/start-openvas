@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+echo "Starting OSPD..."
+rm -f /run/ospd.pid /run/ospd.sock
+ospd-openvas -l /usr/local/var/log/gvm/ospd.log --unix-socket /run/ospd.sock --pid-file=/run/ospd.pid &
+echo "OSPD ready."
+
+echo "Starting GVMD..."
+gvmd --listen-group=service --listen-owner=service --osp-vt-update=/run/ospd.sock
+echo "Testing GVMD status..."
+sleep 1
+X="$(ps -aux | grep -v grep | grep 'gvmd: Waiting')"
+while  [ "${#X}" == 0 ]; do
+    echo "GVMD not yet ready..."
+    sleep 1
+    X="$(ps -aux | grep -v grep | grep 'gvmd: Waiting')"
+done
+echo "GVMD ready."
+
+echo "Pushing plugins to Redis..."
+sleep 1
+X="$(ps -aux | grep -v grep | grep 'openvas: Reloaded')"
+while  [ "${#X}" != 0 ]; do
+    sleep 1
+    X="$(ps -aux | grep -v grep | grep 'openvas: Reloaded')"
+done
+sleep 1
+echo "Plugins pushed to Redis."
+
+echo "Wating for OSPD socket..."
+sleep 1
+while [[ ! -f /run/ospd.sock ]]
+do
+    echo "OSPD socket does not exists yet..."
+  sleep 1
+done
+echo "OSPD socket ready."

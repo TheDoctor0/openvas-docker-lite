@@ -1,14 +1,13 @@
 #!/bin/bash
 start-services
-start-ospd
-start-gvmd
+start-openvas
 
 echo "Synchronizing NVT cache..."
-sleep 3
-X="$(ps -aux | grep -v grep | grep 'openvas: Reloaded')"
+sleep 1
+X="$(ps -aux | grep -v grep | grep 'gmvd: Reloading')"
 while  [ "${#X}" != 0 ]; do
-    echo "Still synchronizing NVT cache..."
-    sleep 15
-    X="$(ps -aux | grep -v grep | grep 'openvas: Reloaded')"
+    sleep 1
+    X="$(ps -aux | grep -v grep | grep 'gmvd: Reloading')"
 done
+sleep 1
 echo "NVT cache synchronized."

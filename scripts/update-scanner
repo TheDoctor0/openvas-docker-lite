@@ -7,16 +7,14 @@ greenbone-scapdata-sync
 greenbone-certdata-sync
 echo "OpenVAS feeds synced."
 
-start-ospd
-start-gvmd
+start-openvas
 
 # There is a problem with SCAP Sync: https://github.com/greenbone/gvmd/issues/822
 echo "Checking synchronization progress..."
-sleep 3
-X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|openvas: Reloaded')"
+sleep 1
+X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gmvd: Reloading')"
 while  [ "${#X}" != 0 ]; do
-    echo "Still synchronizing the update..."
-    sleep 15
-    X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|openvas: Reloaded')"
+    sleep 1
+    X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gmvd: Reloading')"
 done
 echo "Synchronized update."

@@ -1,5 +1,0 @@
-#!/bin/bash
-echo "Starting OSPD..."
-rm -f /run/ospd.sock /run/ospd.pid
-ospd-openvas -l /usr/local/var/log/gvm/ospd.log --unix-socket /run/ospd.sock --pid-file=/run/ospd.pid &
-echo "OSPD ready."
