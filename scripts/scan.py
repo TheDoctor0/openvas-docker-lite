@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Automation script for OpenVAS 10."""
 
-import os
-
 import argparse
 import subprocess
 import time
@@ -167,26 +165,23 @@ def start_scan(args: argparse.Namespace) -> None:
     if args.debug:
         DEBUG = True
 
-    with open(os.devnull, 'w') as devnull:
-        subprocess.check_call(
-            ["sed -i 's/max_hosts.*/max_hosts = " + str(args.hosts) + "/' /usr/local/etc/openvas/openvas.conf"],
-            shell=True,
-            stdout=devnull
-        )
-        subprocess.check_call(
-            ["sed -i 's/max_checks.*/max_checks = " + str(args.checks) + "/' /usr/local/etc/openvas/openvas.conf"],
-            shell=True,
-            stdout=devnull
-        )
+    subprocess.check_call(
+        ["sed -i 's/max_hosts.*/max_hosts = " + str(args.hosts) + "/' /usr/local/etc/openvas/openvas.conf"],
+        shell=True,
+        stdout=subprocess.DEVNULL
+    )
+    subprocess.check_call(
+        ["sed -i 's/max_checks.*/max_checks = " + str(args.checks) + "/' /usr/local/etc/openvas/openvas.conf"],
+        shell=True,
+        stdout=subprocess.DEVNULL
+    )
 
     if args.update is True:
         print("Starting and updating OpenVAS...")
-        with open(os.devnull, 'w') as devnull:
-            subprocess.check_call(["/update-scanner"], shell=True, stdout=devnull)
+        subprocess.check_call(["/update-scanner"], shell=True, stdout=subprocess.DEVNULL)
     else:
         print("Starting OpenVAS...")
-        with open(os.devnull, 'w') as devnull:
-            subprocess.check_call(["/start-scanner"], shell=True, stdout=devnull)
+        subprocess.check_call(["/start-scanner"], shell=True, stdout=subprocess.DEVNULL)
 
     print("Starting scan with settings:")
     print("* Target: {}".format(args.target))
