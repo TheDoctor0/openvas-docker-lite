@@ -130,7 +130,7 @@ def make_scan(scan: Dict[str, str]) -> None:
             time.sleep(5)
 
             task = execute_command(
-                r"<get_tasks task_id=\"{}\" filter=\"apply_overrides=1\" ignore_pagination=\"1\"/>".format(task_id)
+                r"<get_tasks task_id=\"{}\" filter=\"apply_overrides=0\" ignore_pagination=\"1\"/>".format(task_id)
             )
             status = etree.XML(task).xpath("//status/text()")
             progress: int = int(etree.XML(task).xpath("string(//progress/text())"))
@@ -145,7 +145,7 @@ def make_scan(scan: Dict[str, str]) -> None:
     report_id: str = etree.XML(task).xpath("string(//report/@id)")
     report: str = execute_command(
         r"<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, scan['format']) +
-        r"filter=\"apply_overrides=1 levels=hmlf\" ignore_pagination=\"1\" notes_details=\"1\"/>",
+        r"filter=\"apply_overrides=0\" ignore_pagination=\"1\" notes_details=\"1\"/>",
         "//get_reports_response/report/text()"
     )
     print(str(report))

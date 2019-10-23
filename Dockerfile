@@ -122,6 +122,7 @@ RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
 
 COPY scripts/start-services /usr/local/bin/start-services
 COPY scripts/start-ospd /usr/local/bin/start-ospd
+COPY scripts/start-gvmd /usr/local/bin/start-gvmd
 COPY scripts/start-scanner /usr/local/bin/start-scanner
 COPY scripts/update-scanner /usr/local/bin/update-scanner
 COPY scripts/configure-scanner /configure-scanner
@@ -132,6 +133,7 @@ RUN mkdir reports && \
     chmod 777 reports && \
     chmod +x /usr/local/bin/start-services && \
     chmod +x /usr/local/bin/start-ospd && \
+    chmod +x /usr/local/bin/start-gvmd && \
     chmod +x /usr/local/bin/start-scanner && \
     chmod +x /usr/local/bin/update-scanner && \
     chmod +x /configure-scanner && \
