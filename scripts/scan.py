@@ -178,10 +178,10 @@ def start_scan(args: argparse.Namespace) -> None:
 
     if args.update is True:
         print("Starting and updating OpenVAS...")
-        subprocess.check_call(["/update-scanner"], shell=True, stdout=subprocess.DEVNULL)
+        subprocess.check_call(["update-scanner"], shell=True, stdout=subprocess.DEVNULL)
     else:
         print("Starting OpenVAS...")
-        subprocess.check_call(["/start-scanner"], shell=True, stdout=subprocess.DEVNULL)
+        subprocess.check_call(["start-scanner"], shell=True, stdout=subprocess.DEVNULL)
 
     print("Starting scan with settings:")
     print("* Target: {}".format(args.target))

@@ -120,21 +120,21 @@ RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
     cd ../ && \
     rm -rf impacket
 
-COPY scripts/start-services /start-services
-COPY scripts/start-ospd /start-ospd
-COPY scripts/start-scanner /start-scanner
-COPY scripts/update-scanner /update-scanner
-COPY scripts/configure-scanner /configure-scanner
+COPY scripts/start-services /usr/local/bin/start-services
+COPY scripts/start-ospd /usr/local/bin/start-ospd
+COPY scripts/start-scanner /usr/local/bin/start-scanner
+COPY scripts/update-scanner /usr/local/bin/update-scanner
+COPY scripts/configure-scanner /usr/local/bin/configure-scanner
 COPY scripts/scan.py scan.py
 COPY configs/openvas.conf /usr/local/etc/openvas/openvas.conf
 
 RUN mkdir reports && \
     chmod 777 reports && \
-    chmod +x /start-services && \
-    chmod +x /start-ospd && \
-    chmod +x /start-scanner && \
-    chmod +x /update-scanner && \
-    chmod +x /configure-scanner && \
+    chmod +x /usr/local/bin/start-services && \
+    chmod +x /usr/local/bin/start-ospd && \
+    chmod +x /usr/local/bin/start-scanner && \
+    chmod +x /usr/local/bin/update-scanner && \
+    chmod +x /usr/local/bin/configure-scanner && \
     chmod +x scan.py && \
     echo "net.core.somaxconn = 1024"  >> /etc/sysctl.conf && \
     echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
