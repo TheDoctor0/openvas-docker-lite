@@ -143,5 +143,5 @@ RUN mkdir reports && \
     echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
 
 RUN bash /configure-scanner && \
-    rm -f /configure-scanner &&
+    rm -f /configure-scanner && \
     rm -rf /usr/local/var/log/gvm/*.log
