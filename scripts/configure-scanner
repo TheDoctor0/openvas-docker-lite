@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+start-services
+
+echo "Creating database..."
+sudo -u postgres createuser -DRS root && \
+sudo -u postgres createdb -O root gvmd && \
+sudo -u postgres psql gvmd -c 'create role dba with superuser noinherit;' && \
+sudo -u postgres psql gvmd -c 'grant dba to root;' && \
+sudo -u postgres psql gvmd -c 'create extension "uuid-ossp";'
+echo "Database created."
+
+echo "Creating certificates..."
+gvm-manage-certs -a
+echo "Certificates created."
+
+echo "Creating user..."
+gvmd --create-user=admin
+gvmd --user=admin --new-password=admin
+echo "User created."
+
+echo "Creating scanner..."
+gvmd --create-scanner="Scanner" --scanner-type="OpenVas" --scanner-host=/run/ospd.sock
+echo "Scanner created."
+
+start-ospd
+
+echo "Starting GVMD..."
+gvmd --listen-group=service --listen-owner=service --osp-vt-update=/run/ospd.sock
+echo "Testing GVMD status..."
+sleep 3
+X="$(ps -aux | grep '[g]vmd: Waiting')"
+while  [ "${#X}" == 0 ]; do
+    echo "GVMD not yet ready..."
+    sleep 3
+    X="$(ps -aux | grep '[g]vmd: Waiting')"
+done
+# There is a problem with SCAP Sync: https://github.com/greenbone/gvmd/issues/822
+#sleep 3
+#X="$(ps -aux | grep '[g]vmd: Syncing')"
+#while  [ "${#X}" != 0 ]; do
+#    echo "GVMD is still syncing update..."
+#    sleep 15
+#    X="$(ps -aux | grep '[g]vmd: Syncing')"
+#done
+#echo "GVMD ready."
