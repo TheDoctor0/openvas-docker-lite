@@ -114,8 +114,9 @@ RUN cd ${SRC_PATH}/gvmd-* && \
     rm -rf ${SRC_PATH}/gvmd-*
 
 RUN ldconfig && \
-    sleep 10 && \
-    greenbone-scapdata-sync && \
+    #Problem with SCAP sync: https://github.com/greenbone/gvmd/issues/822
+    #sleep 10 && \
+    #greenbone-scapdata-sync && \
     sleep 10 && \
     greenbone-certdata-sync
 

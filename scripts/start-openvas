@@ -31,7 +31,6 @@ while [ ! -e /run/ospd.sock ]; do
 done
 echo "OSPD socket ready."
 
-# Problem with SCAP Sync: https://github.com/greenbone/gvmd/issues/822
 echo "Synchronizing certs and NVT cache..."
 sleep 5
 X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Reloading NVTs')"
