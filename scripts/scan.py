@@ -33,7 +33,6 @@ report_formats: Dict[str, str] = {
     "CPE": "5ceff8ba-1f62-11e1-ab9f-406186ea4fc5",
     "CSV Hosts": "9087b18c-626c-11e3-8892-406186ea4fc5",
     "CSV Results": "c1645568-627a-11e3-a660-406186ea4fc5",
-    "HTML": "6c248850-1f62-11e1-b082-406186ea4fc5",
     "ITG": "77bd6c4a-1f62-11e1-abf0-406186ea4fc5",
     "LaTeX": "a684c02c-b531-11e1-bdc2-406186ea4fc5",
     "NBE": "9ca6fe72-1f62-11e1-9e7c-406186ea4fc5",

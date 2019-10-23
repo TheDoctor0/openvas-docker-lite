@@ -37,16 +37,15 @@ By default report is saved as *openvas.report*.
 3. CPE
 4. CSV Hosts
 5. CSV Results
-6. HTML
-7. ITG
-8. LaTeX
-9. NBE
-10. PDF
-11. Topology SVG
-12. TXT
-13. Verinice ISM
-14. Verinice ITG
-15. XML
+6. ITG
+7. LaTeX
+8. NBE
+9. PDF
+10. Topology SVG
+11. TXT
+12. Verinice ISM
+13. Verinice ITG
+14. XML
 
 You can select what report format will be used with **-f** or **--format** argument with one of the available profiles.
 
