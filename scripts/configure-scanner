@@ -26,10 +26,9 @@ start-openvas
 
 # There is a problem with SCAP Sync: https://github.com/greenbone/gvmd/issues/822
 echo "Checking synchronization progress..."
-sleep 1
+sleep 5
 X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gmvd: Reloading')"
 while  [ "${#X}" != 0 ]; do
-    echo "Still synchronizing the update..."
     sleep 1
     X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gmvd: Reloading')"
 done
