@@ -132,7 +132,7 @@ def make_scan(scan: Dict[str, str]) -> None:
             task = execute_command(
                 r"<get_tasks task_id=\"{}\" filter=\"apply_overrides=0\" ignore_pagination=\"1\"/>".format(task_id)
             )
-            status = etree.XML(task).xpath("//status/text()")
+            status = etree.XML(task).xpath("string(//status/text())")
             progress: int = int(etree.XML(task).xpath("string(//progress/text())"))
 
             if progress > 0:
