@@ -124,8 +124,8 @@ COPY scripts/start-services /usr/local/bin/start-services
 COPY scripts/start-ospd /usr/local/bin/start-ospd
 COPY scripts/start-scanner /usr/local/bin/start-scanner
 COPY scripts/update-scanner /usr/local/bin/update-scanner
-COPY scripts/configure-scanner /usr/local/bin/configure-scanner
-COPY scripts/scan.py scan.py
+COPY scripts/configure-scanner /configure-scanner
+COPY scripts/scan.py /scan.py
 COPY configs/openvas.conf /usr/local/etc/openvas/openvas.conf
 
 RUN mkdir reports && \
@@ -134,8 +134,8 @@ RUN mkdir reports && \
     chmod +x /usr/local/bin/start-ospd && \
     chmod +x /usr/local/bin/start-scanner && \
     chmod +x /usr/local/bin/update-scanner && \
-    chmod +x /usr/local/bin/configure-scanner && \
-    chmod +x scan.py && \
+    chmod +x /configure-scanner && \
+    chmod +x /scan.py && \
     echo "net.core.somaxconn = 1024"  >> /etc/sysctl.conf && \
     echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
 
