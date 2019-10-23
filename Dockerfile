@@ -147,4 +147,6 @@ RUN mkdir reports && \
 
 RUN bash /configure-scanner && \
     rm -f /configure-scanner && \
-    rm -rf /usr/local/var/log/gvm/*.log
+    rm -rf /usr/local/var/log/gvm/*.log && \
+    /etc/init.d/postgresql stop && \
+    /etc/init.d/redis-server stop
