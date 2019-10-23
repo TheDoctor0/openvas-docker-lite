@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
+"""Automation script for OpenVAS 10."""
 
-from typing import Optional
-from typing import Union
-from typing import List
-from typing import Dict
-from typing import Set
-from typing import IO
-from lxml import etree
-import subprocess
-import argparse
-import time
 import os
 
-debug: bool = False
+import argparse
+import subprocess
+import time
+from lxml import etree
+from typing import Dict
+from typing import IO
+from typing import List
+from typing import Optional
+from typing import Set
+from typing import Union
+
+DEBUG: bool = False
 
 scan_profiles: Dict[str, str] = {
     "Discovery": "8715c877-47a0-438d-98a3-27c7a6ab2196",
@@ -79,17 +81,17 @@ def perform_cleanup() -> None:
 
 def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, float, bool, List]:
     """Execute gvmd command and return its output (optionally xpath can be used to get nested XML element)."""
-    global debug
+    global DEBUG
 
     command: str = "su - service -c \"gvm-cli --gmp-username admin --gmp-password admin " \
                    "socket --xml \'{}\'\"".format(command)
 
-    if debug:
+    if DEBUG:
         print("[DEBUG] Command: {}".format(command))
 
     response: str = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
 
-    if debug:
+    if DEBUG:
         print("[DEBUG] Response: {}".format(response))
 
     return etree.XML(response).xpath(xpath) if xpath else response
@@ -161,10 +163,10 @@ def make_scan(scan: Dict[str, str]) -> None:
 
 def start_scan(args: argparse.Namespace) -> None:
     """Override default settings and start scan."""
-    global debug
+    global DEBUG
 
     if args.debug:
-        debug = True
+        DEBUG = True
 
     with open(os.devnull, 'w') as devnull:
         subprocess.check_call(
@@ -181,11 +183,11 @@ def start_scan(args: argparse.Namespace) -> None:
     if args.update is True:
         print("Starting and updating OpenVAS...")
         with open(os.devnull, 'w') as devnull:
-            subprocess.check_call(["/update"], shell=True, stdout=devnull)
+            subprocess.check_call(["/update-scanner"], shell=True, stdout=devnull)
     else:
         print("Starting OpenVAS...")
         with open(os.devnull, 'w') as devnull:
-            subprocess.check_call(["/start"], shell=True, stdout=devnull)
+            subprocess.check_call(["/start-scanner"], shell=True, stdout=devnull)
 
     print("Starting scan with settings:")
     print("* Target: {}".format(args.target))
@@ -203,6 +205,7 @@ def start_scan(args: argparse.Namespace) -> None:
 
 
 def report_format(arg: Optional[str]) -> str:
+    """Check if report format value is valid."""
     if arg not in report_formats:
         raise argparse.ArgumentTypeError("Specified report format is invalid!")
 
@@ -210,6 +213,7 @@ def report_format(arg: Optional[str]) -> str:
 
 
 def scan_profile(arg: Optional[str]) -> str:
+    """Check if scan profile value is valid."""
     if arg not in scan_profiles:
         raise argparse.ArgumentTypeError("Specified scan profile is invalid!")
 
@@ -217,6 +221,7 @@ def scan_profile(arg: Optional[str]) -> str:
 
 
 def alive_test(arg: Optional[str]) -> str:
+    """Check if alive test value is valid."""
     if arg not in alive_tests:
         raise argparse.ArgumentTypeError("Specified alive tests are invalid!")
 
@@ -224,6 +229,7 @@ def alive_test(arg: Optional[str]) -> str:
 
 
 def max_hosts(arg: Optional[str]) -> int:
+    """Check if max hosts value is valid."""
     try:
         value = int(arg)
 
@@ -236,6 +242,7 @@ def max_hosts(arg: Optional[str]) -> int:
 
 
 def max_checks(arg: Optional[str]) -> int:
+    """Check if max checks value is valid."""
     try:
         value = int(arg)
 
@@ -248,6 +255,7 @@ def max_checks(arg: Optional[str]) -> int:
 
 
 def parse_arguments():
+    """Add and parse script arguments."""
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description='Run OpenVAS scan with specified target and save report.')
     parser.add_argument('target', help='scan target')
