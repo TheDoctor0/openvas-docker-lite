@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Automation script for OpenVAS 10."""
 
+from base64 import b64decode
+
 import argparse
 import subprocess
-import time
 from lxml import etree
+from time import sleep
 from typing import Dict
 from typing import IO
 from typing import List
@@ -56,8 +58,10 @@ alive_tests: Set[str] = {
 }
 
 
-def save_report(path: str, report: str) -> None:
-    """Save raw OpenVAS report to specified file."""
+def save_report(path: str, raw_report: str, output_format: str = None) -> None:
+    """Save OpenVAS report to specified file. Decode from Base64 if not XML."""
+    report = raw_report if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5' else b64decode(raw_report)
+
     file: IO[str] = open(path, 'w')
     file.write(report)
     file.close()
@@ -127,11 +131,9 @@ def make_scan(scan: Dict[str, str]) -> None:
 
     while status != "Done":
         try:
-            time.sleep(5)
+            sleep(5)
 
-            task = execute_command(
-                r"<get_tasks task_id=\"{}\" filter=\"apply_overrides=0\" ignore_pagination=\"1\"/>".format(task_id)
-            )
+            task = execute_command("<get_tasks task_id=\"{}\"/>".format(task_id))
             status = etree.XML(task).xpath("string(//status/text())")
             progress: int = int(etree.XML(task).xpath("string(//progress/text())"))
 
@@ -150,7 +152,7 @@ def make_scan(scan: Dict[str, str]) -> None:
     )
     print("Generated report.")
 
-    save_report(scan['output'], str(report))
+    save_report(scan['output'], report, scan['format'])
     print("Saved report to {}.".format(scan['output']))
 
     perform_cleanup()
