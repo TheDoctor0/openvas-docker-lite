@@ -47,6 +47,8 @@ RUN apt-get update && \
         bison \
         xsltproc \
         gnutls-bin \
+        xmltoman \
+        doxygen \
     -yq && \
     apt-get install texlive-latex-extra --no-install-recommends -yq && \
     apt-get install texlive-fonts-recommended -yq && \
