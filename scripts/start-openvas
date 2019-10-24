@@ -32,7 +32,7 @@ done
 echo "OSPD socket ready."
 
 echo "Synchronizing certs and NVT cache..."
-sleep 5
+sleep 30
 X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Reloading NVTs')"
 while  [ "${#X}" != 0 ]; do
     sleep 1
