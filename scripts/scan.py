@@ -89,46 +89,29 @@ def perform_cleanup() -> None:
         execute_command(r"<delete_target target_id=\"{}\" ultimate=\"true\"/>".format(target.get("id")))
 
 
-def save_report(path: str, raw_report: etree.Element, output_format: str = None) -> None:
-    """Save OpenVAS report to specified file. Decode from Base64 if not XML."""
-    if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
-        report: str = etree.tostring(raw_report).strip()
-    else:
-        report: str = base64.b64decode(etree.tostring(raw_report, method="text").strip())
-
+def save_report(path: str, report: str) -> None:
+    """Save report to specified file."""
     file: IO[str] = open(path, 'wb')
     file.write(report)
     file.close()
 
 
-def make_scan(scan: Dict[str, str]) -> None:
-    """Make automated OpenVAS scan and save generated report."""
-    perform_cleanup()
-    print("Performed initial cleanup.")
+def get_report(report_id: str, output_format: str) -> str:
+    """Get generated report. Decode from Base64 if not XML."""
+    command: str = r"<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
+                   r"filter=\"levels=hmlg\" details=\"1\" notes_details=\"1\"" + \
+                   r" result_tags=\"1\" ignore_pagination=\"1\"/>"
 
-    command: str = r"<create_target><name>scan</name><hosts>{}</hosts>".format(scan['target']) + \
-                   r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
-                   r"<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
-    target_id: str = execute_command(command, "string(//create_target_response/@id)")
-    print("Created target with id: {}.".format(target_id))
+    if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
+        report: etree.Element = execute_command(command, '//get_reports_response/report')[0]
+    else:
+        report: str = execute_command(command, 'string(//get_reports_response/report/text())')
 
-    scanner_id: str = execute_command(
-        r"<get_scanners filter=\"Scanner\"/>",
-        "string(//get_scanners_response/scanner/@id)"
-    )
-    print("Found scanner with id: {}.".format(scanner_id))
+    return base64.b64decode(report) if isinstance(report, str) else etree.tostring(report).strip()
 
-    command = r"<create_task><name>Scan</name>" + \
-              r"<target id=\"{}\"></target>".format(target_id) + \
-              r"<scanner id=\"{}\"></scanner>".format(scanner_id) + \
-              r"<config id=\"{}\"></config></create_task>".format(scan['profile'])
-    task_id: str = execute_command(command, "string(//create_task_response/@id)")
-    print("Created task with id: {}.".format(task_id))
 
-    execute_command(r"<start_task task_id=\"{}\"/>".format(task_id))
-    print("Started task.")
-
-    print("Waiting for task to finish...")
+def process_task(task_id: str) -> str:
+    """Wait for task to finish and return report id."""
     status: Optional[str] = None
     task: Optional[str] = None
 
@@ -149,15 +132,63 @@ def make_scan(scan: Dict[str, str]) -> None:
         except subprocess.CalledProcessError as exception:
             print("ERROR: ", exception.output)
 
-    report_id: str = etree.XML(task).xpath("string(//report/@id)")
-    report: etree.Element = execute_command(
-        r"<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, scan['format']) +
-        r"filter=\"levels=hmlg\" details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>",
-        "//get_reports_response/report"
-    )[0]
+    return etree.XML(task).xpath("string(//report/@id)")
+
+
+def start_task(task_id) -> None:
+    """Start task with specified id."""
+    execute_command(r"<start_task task_id=\"{}\"/>".format(task_id))
+
+
+def create_task(profile, scanner_id, target_id) -> str:
+    """Create new scan task for target."""
+    command: str = r"<create_task><name>Scan</name>" + \
+                   r"<target id=\"{}\"></target>".format(target_id) + \
+                   r"<scanner id=\"{}\"></scanner>".format(scanner_id) + \
+                   r"<config id=\"{}\"></config></create_task>".format(profile)
+
+    return execute_command(command, "string(//create_task_response/@id)")
+
+
+def get_scanner() -> str:
+    """Get id for OpenVAS scanner. """
+    return execute_command(r"<get_scanners filter=\"Scanner\"/>", "string(//get_scanners_response/scanner/@id)")
+
+
+def create_target(scan) -> str:
+    """Create new target."""
+    command: str = r"<create_target><name>scan</name><hosts>{}</hosts>".format(scan['target']) + \
+                   r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
+                   r"<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
+
+    return execute_command(command, "string(//create_target_response/@id)")
+
+
+def make_scan(scan: Dict[str, str]) -> None:
+    """Make automated OpenVAS scan and save generated report."""
+    perform_cleanup()
+    print("Performed initial cleanup.")
+
+    target_id = create_target(scan)
+    print("Created target with id: {}.".format(target_id))
+
+    scanner_id = get_scanner()
+    print("Found scanner with id: {}.".format(scanner_id))
+
+    task_id = create_task(scan['profile'], scanner_id, target_id)
+    print("Created task with id: {}.".format(task_id))
+
+    start_task(task_id)
+    print("Started task.")
+
+    print("Waiting for task to finish...")
+    report_id = process_task(task_id)
+    print("Finished processing task.")
+
+    report = get_report(report_id, scan['format'])
     print("Generated report.")
 
-    save_report(scan['output'], report, scan['format'])
+    save_report(scan['output'], report)
     print("Saved report to {}.".format(scan['output']))
 
     perform_cleanup()
