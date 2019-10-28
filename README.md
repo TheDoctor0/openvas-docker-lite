@@ -106,7 +106,7 @@ By default **10** is used as *max_checks* variable value.
 
 #### Debug
 
-You can enable printing OMP command responses and OpenVAS logs by adding **--debug** argument.
+You can enable printing OMP commands and responses by adding **--debug** argument.
 
 #### Update
 
