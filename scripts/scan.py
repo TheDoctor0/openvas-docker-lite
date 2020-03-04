@@ -89,6 +89,14 @@ def perform_cleanup() -> None:
         execute_command("<delete_target target_id=\"{}\"/>".format(target.get("id")))
 
 
+def print_logs() -> None:
+    """Show logs from OpenVAS."""
+    if DEBUG:
+        logs: str = open("/var/log/openvas/openvassd.messages", "r").read()
+
+        print("OpenVAS Logs: {}".format(logs))
+
+
 def save_report(path: str, report: str) -> None:
     """Save report to specified file."""
     file: IO[str] = open(path, 'wb')
@@ -181,6 +189,7 @@ def make_scan(scan: Dict[str, str]) -> None:
     save_report(scan['output'], report)
     print("Saved report to {}.".format(scan['output']))
 
+    print_logs()
     perform_cleanup()
     print("Done!")
 
