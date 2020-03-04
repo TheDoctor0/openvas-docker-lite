@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Automation script for OpenVAS 10."""
+"""Automation script for OpenVAS 9."""
 
 import subprocess
 import argparse
