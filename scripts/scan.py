@@ -158,7 +158,7 @@ def create_task(profile, target_id) -> str:
 
 def create_target(scan) -> str:
     """Create new target."""
-    command: str = "<create_target><name>scan</name><hosts>{}</hosts>".format(scan['target']) + \
+    command: str = "<create_target><name>{0}</name><hosts>{0}</hosts>".format(scan['target']) + \
                    "<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
                    "<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
 
