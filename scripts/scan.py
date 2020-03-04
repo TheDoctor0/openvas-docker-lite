@@ -94,7 +94,7 @@ def print_logs() -> None:
     if DEBUG:
         logs: str = open("/var/log/openvas/openvassd.messages", "r").read()
 
-        print("OpenVAS Logs: {}".format(logs))
+        print("[DEBUG] OpenVAS Logs: {}".format(logs))
 
 
 def save_report(path: str, report: str) -> None:
