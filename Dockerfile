@@ -1,5 +1,3 @@
-FROM thedoctor0/openvas-docker-lite
-
 FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -41,7 +39,7 @@ RUN apt-get update && \
     apt-get purge software-properties-common -yq && \
     apt autoremove -yq && \
     rm -rf /var/lib/apt/lists/*
-    
+
 # Install OpenVAS components
 RUN apt-get update && \
     apt-get install software-properties-common --no-install-recommends -yq && \
@@ -82,9 +80,6 @@ RUN mkdir -p /var/run/redis && \
     chmod +x /update && \
     chmod +x scan.py && \
     sed -i 's/DAEMON_ARGS=""/DAEMON_ARGS="-a 0.0.0.0"/' /etc/init.d/openvas-manager
-
-# Copy existing feeds data for faster update.
-COPY --from=0 /var/lib/openvas /var/lib/openvas
 
 # Update OpenVAS
 RUN bash /update && \
