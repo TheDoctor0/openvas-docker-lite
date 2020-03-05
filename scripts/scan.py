@@ -107,7 +107,8 @@ def save_report(path: str, report: str) -> None:
 def get_report(report_id: str, output_format: str) -> str:
     """Get generated report. Decode from Base64 if not XML."""
     command: str = "<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
-                   "filter=\"levels=hmlg\" type=\"scan\" details=\"1\" note_details=\"1\" ignore_pagination=\"1\"/>"
+                   "filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\"" + \
+                   "details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>"
 
     if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
         report: etree.Element = execute_command(command, '//get_reports_response/report')[0]
