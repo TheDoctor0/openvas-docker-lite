@@ -59,10 +59,11 @@ alive_tests: Set[str] = {
 
 
 def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, float, bool, List]:
-    """Execute omp command and return its output (optionally xpath can be used to get nested XML element)."""
+    """Execute GVMD command and return its output (optionally xpath can be used to get nested XML element)."""
     global DEBUG
 
-    command: str = "omp -u admin -w admin -h 127.0.0.1 -p 9390 --xml \'{}\'".format(command)
+    command: str = "su - service -c \"gvm-cli --gmp-username admin --gmp-password admin " \
+                   "socket --socketpath /usr/local/var/run/gvmd.sock --xml \'{}\'\"".format(command)
 
     if DEBUG:
         print("[DEBUG] Command: {}".format(command))
@@ -80,22 +81,22 @@ def perform_cleanup() -> None:
     existing_tasks: List = execute_command("<get_tasks/>", "//get_tasks_response/task")
 
     for task in existing_tasks:
-        execute_command("<delete_task task_id=\"{}\"/>".format(task.get("id")))
+        execute_command("<delete_task task_id=\"{}\" ultimate=\"true\"/>".format(task.get("id")))
 
     existing_targets: List = execute_command("<get_targets/>", "//get_targets_response/target")
 
     for target in existing_targets:
-        execute_command("<delete_target target_id=\"{}\"/>".format(target.get("id")))
+        execute_command("<delete_target target_id=\"{}\" ultimate=\"true\"/>".format(target.get("id")))
 
 
 def print_logs() -> None:
     """Show logs from OpenVAS and GVMD."""
     if DEBUG:
-        logs: str = open("/var/log/gvm/openvas.log", "r").read()
+        logs: str = open("/usr/local/var/log/gvm/openvas.log", "r").read()
 
         print("[DEBUG] OpenVAS Logs: {}".format(logs))
 
-        logs: str = open("/var/log/gvm/gvmd.log", "r").read()
+        logs: str = open("/usr/local/var/log/gvm/gvmd.log", "r").read()
 
         print("[DEBUG] GVMD Logs: {}".format(logs))
 
@@ -162,9 +163,9 @@ def create_task(profile, target_id) -> str:
 
 def create_target(scan) -> str:
     """Create new target."""
-    command: str = "<create_target><name>{0}</name><hosts>{0}</hosts>".format(scan['target']) + \
+    command: str = "<create_target><name>scan</name><hosts>{0}</hosts>".format(scan['target']) + \
                    "<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
-                   "<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
+                   "<live_tests>{}</live_tests></create_target>".format(scan['tests'])
 
     return execute_command(command, "string(//create_target_response/@id)")
 

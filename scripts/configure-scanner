@@ -14,7 +14,7 @@ gvm-manage-certs -a
 echo "Certificates created."
 
 echo "Creating user..."
-gvmd --create-user=admin
+gvmd --create-user=admin --role=Admin
 gvmd --user=admin --new-password=admin
 echo "User created."
 
