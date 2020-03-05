@@ -115,6 +115,7 @@ RUN adduser service --gecos "service,service,service,service" --disabled-passwor
     echo "service:service" | sudo chpasswd
 
 RUN redis-server /etc/redis/redis.conf && \
+    chmod +x /usr/local/bin/greenbone-nvt-sync && \
     ldconfig && \
     sleep 10 && \
     greenbone-nvt-sync
