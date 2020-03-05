@@ -89,11 +89,15 @@ def perform_cleanup() -> None:
 
 
 def print_logs() -> None:
-    """Show logs from OpenVAS."""
+    """Show logs from OpenVAS and GVMD."""
     if DEBUG:
-        logs: str = open("/var/log/openvas/openvas.log", "r").read()
+        logs: str = open("/var/log/gvm/openvas.log", "r").read()
 
         print("[DEBUG] OpenVAS Logs: {}".format(logs))
+
+        logs: str = open("/var/log/gvm/gvmd.log", "r").read()
+
+        print("[DEBUG] GVMD Logs: {}".format(logs))
 
 
 def save_report(path: str, report: str) -> None:
