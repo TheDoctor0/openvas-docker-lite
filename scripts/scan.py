@@ -91,7 +91,7 @@ def perform_cleanup() -> None:
 def print_logs() -> None:
     """Show logs from OpenVAS."""
     if DEBUG:
-        logs: str = open("/var/log/openvas/openvassd.messages", "r").read()
+        logs: str = open("/var/log/openvas/openvas.log", "r").read()
 
         print("[DEBUG] OpenVAS Logs: {}".format(logs))
 
@@ -202,22 +202,22 @@ def start_scan(args: argparse.Namespace) -> None:
         DEBUG = True
 
     subprocess.check_call(
-        ["sed -i 's/max_hosts.*/max_hosts = " + str(args.hosts) + "/' /etc/openvas/openvassd.conf"],
+        ["sed -i 's/max_hosts.*/max_hosts = " + str(args.hosts) + "/' /usr/local/etc/openvas/openvas.conf"],
         shell=True,
         stdout=subprocess.DEVNULL
     )
     subprocess.check_call(
-        ["sed -i 's/max_checks.*/max_checks = " + str(args.checks) + "/' /etc/openvas/openvassd.conf"],
+        ["sed -i 's/max_checks.*/max_checks = " + str(args.checks) + "/' /usr/local/etc/openvas/openvas.conf"],
         shell=True,
         stdout=subprocess.DEVNULL
     )
 
     if args.update is True:
         print("Starting and updating OpenVAS...")
-        subprocess.check_call(["/update"], shell=True, stdout=subprocess.DEVNULL)
+        subprocess.check_call(["update-scanner"], shell=True, stdout=subprocess.DEVNULL)
     else:
         print("Starting OpenVAS...")
-        subprocess.check_call(["/start"], shell=True, stdout=subprocess.DEVNULL)
+        subprocess.check_call(["start-scanner"], shell=True, stdout=subprocess.DEVNULL)
 
     print("Starting scan with settings:")
     print("* Target: {}".format(args.target))
