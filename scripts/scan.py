@@ -58,45 +58,11 @@ alive_tests: Set[str] = {
 }
 
 
-def save_report(path: str, raw_report: str, output_format: str = None) -> None:
-    """Save OpenVAS report to specified file. Decode from Base64 if not XML."""
-    if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
-        report: str = raw_report
-    else:
-        report: str = base64.b64decode(raw_report).decode('utf-8')
-
-    file: IO[str] = open(path, 'w')
-    file.write(report)
-    file.close()
-
-
-def perform_cleanup() -> None:
-    """Remove all existing tasks and targets."""
-    existing_tasks: List = execute_command("<get_tasks/>", "//get_tasks_response/task")
-
-    for task in existing_tasks:
-        execute_command(r"<delete_task task_id=\"{}\" ultimate=\"true\"/>".format(task.get("id")))
-
-    existing_targets: List = execute_command("<get_targets/>", "//get_targets_response/target")
-
-    for target in existing_targets:
-        execute_command(r"<delete_target target_id=\"{}\" ultimate=\"true\"/>".format(target.get("id")))
-
-
-def print_logs() -> None:
-    """Show logs from OpenVAS."""
-    if DEBUG:
-        logs: str = open("/var/log/openvas/openvassd.messages", "r").read()
-
-        print("[DEBUG] OpenVAS Logs: {}".format(logs))
-
-
 def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, float, bool, List]:
-    """Execute gvmd command and return its output (optionally xpath can be used to get nested XML element)."""
+    """Execute omp command and return its output (optionally xpath can be used to get nested XML element)."""
     global DEBUG
 
-    command: str = "su - service -c \"gvm-cli --gmp-username admin --gmp-password admin " \
-                   "socket --xml \'{}\'\"".format(command)
+    command: str = "omp -u admin -w admin -h 127.0.0.1 -p 9390 --xml \'{}\'".format(command)
 
     if DEBUG:
         print("[DEBUG] Command: {}".format(command))
@@ -113,16 +79,21 @@ def perform_cleanup() -> None:
     """Remove all existing tasks and targets."""
     existing_tasks: List = execute_command("<get_tasks/>", "//get_tasks_response/task")
 
-    command: str = r"<create_target><name>{0}</name><hosts>{0}</hosts>".format(scan['target']) + \
-                   r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
-                   r"<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
-    target_id: str = execute_command(command, "string(//create_target_response/@id)")
-    print("Created target with id: {}.".format(target_id))
+    for task in existing_tasks:
+        execute_command("<delete_task task_id=\"{}\"/>".format(task.get("id")))
 
     existing_targets: List = execute_command("<get_targets/>", "//get_targets_response/target")
 
     for target in existing_targets:
-        execute_command(r"<delete_target target_id=\"{}\" ultimate=\"true\"/>".format(target.get("id")))
+        execute_command("<delete_target target_id=\"{}\"/>".format(target.get("id")))
+
+
+def print_logs() -> None:
+    """Show logs from OpenVAS."""
+    if DEBUG:
+        logs: str = open("/var/log/openvas/openvassd.messages", "r").read()
+
+        print("[DEBUG] OpenVAS Logs: {}".format(logs))
 
 
 def save_report(path: str, report: str) -> None:
@@ -134,9 +105,9 @@ def save_report(path: str, report: str) -> None:
 
 def get_report(report_id: str, output_format: str) -> str:
     """Get generated report. Decode from Base64 if not XML."""
-    command: str = r"<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
-                   r"filter=\"levels=hmlg\" details=\"1\" notes_details=\"1\"" + \
-                   r" result_tags=\"1\" ignore_pagination=\"1\"/>"
+    command: str = "<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
+                   "filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\"" + \
+                   "details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>"
 
     if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
         report: etree.Element = execute_command(command, '//get_reports_response/report')[0]
@@ -153,9 +124,9 @@ def process_task(task_id: str) -> str:
 
     while status != "Done":
         try:
-            time.sleep(5)
+            time.sleep(10)
 
-            task = execute_command(r"<get_tasks task_id=\"{}\"/>".format(task_id))
+            task = execute_command("<get_tasks task_id=\"{}\"/>".format(task_id))
             status = etree.XML(task).xpath("string(//status/text())")
             progress: int = int(etree.XML(task).xpath("string(//progress/text())"))
 
@@ -173,29 +144,23 @@ def process_task(task_id: str) -> str:
 
 def start_task(task_id) -> None:
     """Start task with specified id."""
-    execute_command(r"<start_task task_id=\"{}\"/>".format(task_id))
+    execute_command("<start_task task_id=\"{}\"/>".format(task_id))
 
 
-def create_task(profile, scanner_id, target_id) -> str:
+def create_task(profile, target_id) -> str:
     """Create new scan task for target."""
-    command: str = r"<create_task><name>Scan</name>" + \
-                   r"<target id=\"{}\"></target>".format(target_id) + \
-                   r"<scanner id=\"{}\"></scanner>".format(scanner_id) + \
-                   r"<config id=\"{}\"></config></create_task>".format(profile)
+    command: str = "<create_task><name>scan</name>" + \
+                   "<target id=\"{}\"></target>".format(target_id) + \
+                   "<config id=\"{}\"></config></create_task>".format(profile)
 
     return execute_command(command, "string(//create_task_response/@id)")
 
 
-def get_scanner() -> str:
-    """Get id for OpenVAS scanner. """
-    return execute_command(r"<get_scanners filter=\"Scanner\"/>", "string(//get_scanners_response/scanner/@id)")
-
-
 def create_target(scan) -> str:
     """Create new target."""
-    command: str = r"<create_target><name>scan</name><hosts>{}</hosts>".format(scan['target']) + \
-                   r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
-                   r"<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
+    command: str = "<create_target><name>{0}</name><hosts>{0}</hosts>".format(scan['target']) + \
+                   "<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
+                   "<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
 
     return execute_command(command, "string(//create_target_response/@id)")
 
@@ -208,10 +173,7 @@ def make_scan(scan: Dict[str, str]) -> None:
     target_id = create_target(scan)
     print("Created target with id: {}.".format(target_id))
 
-    scanner_id = get_scanner()
-    print("Found scanner with id: {}.".format(scanner_id))
-
-    task_id = create_task(scan['profile'], scanner_id, target_id)
+    task_id = create_task(scan['profile'], target_id)
     print("Created task with id: {}.".format(task_id))
 
     start_task(task_id)
@@ -240,22 +202,22 @@ def start_scan(args: argparse.Namespace) -> None:
         DEBUG = True
 
     subprocess.check_call(
-        ["sed -i 's/max_hosts.*/max_hosts = " + str(args.hosts) + "/' /usr/local/etc/openvas/openvas.conf"],
+        ["sed -i 's/max_hosts.*/max_hosts = " + str(args.hosts) + "/' /etc/openvas/openvassd.conf"],
         shell=True,
         stdout=subprocess.DEVNULL
     )
     subprocess.check_call(
-        ["sed -i 's/max_checks.*/max_checks = " + str(args.checks) + "/' /usr/local/etc/openvas/openvas.conf"],
+        ["sed -i 's/max_checks.*/max_checks = " + str(args.checks) + "/' /etc/openvas/openvassd.conf"],
         shell=True,
         stdout=subprocess.DEVNULL
     )
 
     if args.update is True:
         print("Starting and updating OpenVAS...")
-        subprocess.check_call(["update-scanner"], shell=True, stdout=subprocess.DEVNULL)
+        subprocess.check_call(["/update"], shell=True, stdout=subprocess.DEVNULL)
     else:
         print("Starting OpenVAS...")
-        subprocess.check_call(["start-scanner"], shell=True, stdout=subprocess.DEVNULL)
+        subprocess.check_call(["/start"], shell=True, stdout=subprocess.DEVNULL)
 
     print("Starting scan with settings:")
     print("* Target: {}".format(args.target))
