@@ -1,9 +1,11 @@
 FROM debian:buster
 
-ENV GVM_LIBS_VERSION='11.0.0' \
-    GVMD_VERSION='9.0.0' \
-    OPENVAS_VERSION='7.0.0' \
-    OPENVAS_SMB_VERSION='1.0.5' \
+ENV GVM_LIBS_VERSION='dbef141' \
+    GVMD_VERSION='90dd913' \
+    OPENVAS_VERSION='0fd5aa8' \
+    OPENVAS_SMB_VERSION='de43dab' \
+    OSPD_OPENVAS_VERSION='d019f63' \
+    OSPD_VERSION='5170464' \
     SRC_PATH='/src' \
     DEBIAN_FRONTEND=noninteractive \
     TERM=dumb
@@ -50,6 +52,8 @@ RUN apt-get update && \
         gnutls-bin \
         xmltoman \
         doxygen \
+        xml-twig-tools \
+        libxml2-dev \
     -yq && \
     apt-get install texlive-latex-extra --no-install-recommends -yq && \
     apt-get install texlive-fonts-recommended -yq && \
@@ -59,40 +63,50 @@ RUN pip3 install lxml && \
     pip3 install gvm-tools && \
     pip3 install paramiko && \
     pip3 install defusedxml && \
-    pip3 install ospd && \
-    pip3 install ospd-openvas
+    pip3 install redis && \
+    pip3 install psutil
 
 RUN mkdir ${SRC_PATH} -p && \
     cd ${SRC_PATH} && \
-    curl -o gvm-libs.tar.gz -sL https://github.com/greenbone/gvm-libs/archive/v${GVM_LIBS_VERSION}.tar.gz && \
-    curl -o openvas.tar.gz -sL https://github.com/greenbone/openvas/archive/v${OPENVAS_VERSION}.tar.gz && \
-    curl -o gvmd.tar.gz -sL https://github.com/greenbone/gvmd/archive/v${GVMD_VERSION}.tar.gz && \
-    curl -o openvas-smb.tar.gz -sL https://github.com/greenbone/openvas-smb/archive/v${OPENVAS_SMB_VERSION}.tar.gz && \
+    curl -o gvm-libs.tar.gz -sL https://github.com/greenbone/gvm-libs/archive/${GVM_LIBS_VERSION}.tar.gz && \
+    curl -o openvas.tar.gz -sL https://github.com/greenbone/openvas/archive/${OPENVAS_VERSION}.tar.gz && \
+    curl -o gvmd.tar.gz -sL https://github.com/greenbone/gvmd/archive/${GVMD_VERSION}.tar.gz && \
+    curl -o openvas-smb.tar.gz -sL https://github.com/greenbone/openvas-smb/archive/${OPENVAS_SMB_VERSION}.tar.gz && \
+    curl -o ospd-openvas.tar.gz -sL https://github.com/greenbone/ospd-openvas/archive/${OSPD_OPENVAS_VERSION}.tar.gz && \
+    curl -o ospd.tar.gz -sL https://github.com/greenbone/ospd/archive/${OSPD_VERSION}.tar.gz && \
     find . -name \*.gz -exec tar zxvfp {} \;
 
-RUN cd ${SRC_PATH}/gvm-libs-* && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make && \
-    make install && \
-    rm -rf ${SRC_PATH}/gvm-libs-*
+RUN cd ${SRC_PATH}/ospd-openvas* && \
+    pip3 install . && \
+    rm -rf ${SRC_PATH}/ospd-openvas*
 
-RUN cd ${SRC_PATH}/openvas-smb-* && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make && \
-    make install && \
-    rm -rf ${SRC_PATH}/openvas-smb-*
+RUN cd ${SRC_PATH}/ospd* && \
+    pip3 install . && \
+    rm -rf ${SRC_PATH}/ospd*
 
-RUN cd ${SRC_PATH}/openvas-* && \
+RUN cd ${SRC_PATH}/gvm-libs* && \
     mkdir build && \
     cd build && \
     cmake .. && \
     make && \
     make install && \
-    rm -rf ${SRC_PATH}/openvas-*
+    rm -rf ${SRC_PATH}/gvm-libs*
+
+RUN cd ${SRC_PATH}/openvas-smb* && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install && \
+    rm -rf ${SRC_PATH}/openvas-smb*
+
+RUN cd ${SRC_PATH}/openvas* && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install && \
+    rm -rf ${SRC_PATH}/openvas*
 
 COPY configs/redis.conf /etc/redis/redis.conf
 COPY scripts/sync-feeds /usr/local/bin/greenbone-nvt-sync
@@ -101,8 +115,8 @@ RUN adduser service --gecos "service,service,service,service" --disabled-passwor
     echo "service:service" | sudo chpasswd
 
 RUN redis-server /etc/redis/redis.conf && \
-    chmod +x /usr/local/bin/greenbone-nvt-sync && \
     ldconfig && \
+    sleep 10 && \
     greenbone-nvt-sync
 
 RUN cd ${SRC_PATH}/gvmd-* && \
@@ -114,7 +128,7 @@ RUN cd ${SRC_PATH}/gvmd-* && \
     rm -rf ${SRC_PATH}/gvmd-*
 
 RUN ldconfig && \
-    #Problem with SCAP sync: https://github.com/greenbone/gvmd/issues/822
+    #Problem with long SCAP sync: https://github.com/greenbone/gvmd/issues/822
     #sleep 10 && \
     #greenbone-scapdata-sync && \
     sleep 10 && \

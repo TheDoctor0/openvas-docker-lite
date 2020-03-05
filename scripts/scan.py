@@ -58,6 +58,39 @@ alive_tests: Set[str] = {
 }
 
 
+def save_report(path: str, raw_report: str, output_format: str = None) -> None:
+    """Save OpenVAS report to specified file. Decode from Base64 if not XML."""
+    if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
+        report: str = raw_report
+    else:
+        report: str = base64.b64decode(raw_report).decode('utf-8')
+
+    file: IO[str] = open(path, 'w')
+    file.write(report)
+    file.close()
+
+
+def perform_cleanup() -> None:
+    """Remove all existing tasks and targets."""
+    existing_tasks: List = execute_command("<get_tasks/>", "//get_tasks_response/task")
+
+    for task in existing_tasks:
+        execute_command(r"<delete_task task_id=\"{}\" ultimate=\"true\"/>".format(task.get("id")))
+
+    existing_targets: List = execute_command("<get_targets/>", "//get_targets_response/target")
+
+    for target in existing_targets:
+        execute_command(r"<delete_target target_id=\"{}\" ultimate=\"true\"/>".format(target.get("id")))
+
+
+def print_logs() -> None:
+    """Show logs from OpenVAS."""
+    if DEBUG:
+        logs: str = open("/var/log/openvas/openvassd.messages", "r").read()
+
+        print("[DEBUG] OpenVAS Logs: {}".format(logs))
+
+
 def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, float, bool, List]:
     """Execute gvmd command and return its output (optionally xpath can be used to get nested XML element)."""
     global DEBUG
@@ -80,8 +113,11 @@ def perform_cleanup() -> None:
     """Remove all existing tasks and targets."""
     existing_tasks: List = execute_command("<get_tasks/>", "//get_tasks_response/task")
 
-    for task in existing_tasks:
-        execute_command(r"<delete_task task_id=\"{}\" ultimate=\"true\"/>".format(task.get("id")))
+    command: str = r"<create_target><name>{0}</name><hosts>{0}</hosts>".format(scan['target']) + \
+                   r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
+                   r"<alive_tests>{}</alive_tests></create_target>".format(scan['tests'])
+    target_id: str = execute_command(command, "string(//create_target_response/@id)")
+    print("Created target with id: {}.".format(target_id))
 
     existing_targets: List = execute_command("<get_targets/>", "//get_targets_response/target")
 
@@ -130,7 +166,7 @@ def process_task(task_id: str) -> str:
             else:
                 print("Task status: Complete")
         except subprocess.CalledProcessError as exception:
-            print("ERROR: ", exception.output)
+            print("[ERROR] ", exception.output)
 
     return etree.XML(task).xpath("string(//report/@id)")
 
@@ -191,6 +227,7 @@ def make_scan(scan: Dict[str, str]) -> None:
     save_report(scan['output'], report)
     print("Saved report to {}.".format(scan['output']))
 
+    print_logs()
     perform_cleanup()
     print("Done!")
 
@@ -300,10 +337,10 @@ def parse_arguments():
                         default="ICMP, TCP-ACK Service & ARP Ping", type=alive_test, required=False)
     parser.add_argument('-e', '--exclude', help='hosts excluded from scan target (Default: "")',
                         default="", required=False)
-    parser.add_argument('-m', '--hosts', help='maximum number of simultaneous tested hosts (Default: 3)',
-                        type=max_hosts, default=3, required=False)
-    parser.add_argument('-c', '--checks', help='maximum number of simultaneous checks against each host (Default: 10)',
-                        type=max_checks, default=10, required=False)
+    parser.add_argument('-m', '--hosts', help='maximum number of simultaneous tested hosts (Default: 15)',
+                        type=max_hosts, default=15, required=False)
+    parser.add_argument('-c', '--checks', help='maximum number of simultaneous checks against each host (Default: 5)',
+                        type=max_checks, default=5, required=False)
     parser.add_argument('--update', help='synchronize feeds before scanning',
                         nargs='?', const=True, default=False, required=False)
     parser.add_argument('--debug', help='enable command responses printing',

@@ -23,6 +23,7 @@ echo "OSPD socket ready."
 echo "Starting GVMD..."
 gvmd --listen-group=service --listen-owner=service --osp-vt-update=/run/ospd.sock
 echo "Testing GVMD status..."
+echo "Synchronizing CERT, SCAP and NVT cache..."
 sleep 5
 X="$(ps -aux | grep -v grep | grep 'gvmd: Waiting')"
 while  [ "${#X}" == 0 ]; do
@@ -34,8 +35,9 @@ echo "GVMD ready."
 echo "Synchronizing certs and NVT cache..."
 sleep 30
 X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Reloading NVTs')"
+X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
 while  [ "${#X}" != 0 ]; do
     sleep 1
-    X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Reloading NVTs')"
+    X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
 done
-echo "Certs and NVT cache synchronized."
+echo "CERT, SCAP and NVT cache synchronized."
