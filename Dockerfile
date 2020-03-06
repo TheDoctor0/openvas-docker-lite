@@ -1,7 +1,7 @@
 FROM debian:buster
 
 ENV GVM_LIBS_VERSION='dbef141' \
-    GVMD_VERSION='90dd913' \
+    GVMD_VERSION='fb669bb' \
     OPENVAS_VERSION='0fd5aa8' \
     OPENVAS_SMB_VERSION='de43dab' \
     OSPD_OPENVAS_VERSION='d019f63' \
@@ -130,8 +130,8 @@ RUN cd ${SRC_PATH}/gvmd-* && \
 
 RUN ldconfig && \
     #Problem with long SCAP sync: https://github.com/greenbone/gvmd/issues/822
-    #sleep 10 && \
-    #greenbone-scapdata-sync && \
+    sleep 10 && \
+    greenbone-scapdata-sync && \
     sleep 10 && \
     greenbone-certdata-sync
 

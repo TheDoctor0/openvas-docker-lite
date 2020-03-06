@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 echo "Starting OSPD..."
-rm -f /run/ospd.pid /run/ospd.sock
-ospd-openvas -l /usr/local/var/log/gvm/ospd.log --unix-socket /run/ospd.sock --pid-file=/run/ospd.pid &
+rm -f /usr/local/var/run/ospd.pid /usr/local/var/run/ospd.sock
+ospd-openvas -l /usr/local/var/log/gvm/ospd.log --unix-socket /usr/local/var/run/ospd.sock --pid-file=/usr/local/var/run/ospd.pid &
 echo "OSPD ready."
 
 echo "Pushing plugins to Redis..."
@@ -15,13 +15,13 @@ echo "Plugins pushed to Redis."
 
 echo "Waiting for OSPD socket..."
 sleep 5
-while [ ! -e /run/ospd.sock ]; do
+while [ ! -e /usr/local/var/run/ospd.sock ]; do
   sleep 1
 done
 echo "OSPD socket ready."
 
 echo "Starting GVMD..."
-gvmd --listen-group=service --listen-owner=service --osp-vt-update=/run/ospd.sock
+gvmd --listen-group=service --listen-owner=service --osp-vt-update=/usr/local/var/run/ospd.sock
 echo "Testing GVMD status..."
 sleep 5
 X="$(ps -aux | grep -v grep | grep 'gvmd: Waiting')"
