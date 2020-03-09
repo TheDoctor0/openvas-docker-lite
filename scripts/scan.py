@@ -300,10 +300,10 @@ def parse_arguments():
                         default="ICMP, TCP-ACK Service & ARP Ping", type=alive_test, required=False)
     parser.add_argument('-e', '--exclude', help='hosts excluded from scan target (Default: "")',
                         default="", required=False)
-    parser.add_argument('-m', '--hosts', help='maximum number of simultaneous tested hosts (Default: 3)',
-                        type=max_hosts, default=3, required=False)
-    parser.add_argument('-c', '--checks', help='maximum number of simultaneous checks against each host (Default: 10)',
-                        type=max_checks, default=10, required=False)
+    parser.add_argument('-m', '--hosts', help='maximum number of simultaneous tested hosts (Default: 10)',
+                        type=max_hosts, default=10, required=False)
+    parser.add_argument('-c', '--checks', help='maximum number of simultaneous checks against each host (Default: 3)',
+                        type=max_checks, default=3, required=False)
     parser.add_argument('--update', help='synchronize feeds before scanning',
                         nargs='?', const=True, default=False, required=False)
     parser.add_argument('--debug', help='enable command responses printing',

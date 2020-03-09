@@ -95,14 +95,14 @@ By default list of excluded hosts is empty.
 It is possible to override *max_hosts* variable in OpenVAS config which specify maximum number of simultaneous hosts tested.
 Just add **-m** or **--hosts** argument with wanted numeric value.
 
-By default **3** is used as *max_hosts* variable value.
+By default **10** is used as *max_hosts* variable value.
 
 #### Max Checks
 
 It is possible to override *max_checks* variable in OpenVAS config which specify maximum number of simultaneous checks against each host tested.
 Just add **-c** or **--checks** argument with wanted numeric value.
 
-By default **10** is used as *max_checks* variable value.
+By default **3** is used as *max_checks* variable value.
 
 #### Debug
 
