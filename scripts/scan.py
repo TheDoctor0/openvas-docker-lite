@@ -68,7 +68,13 @@ def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, flo
     if DEBUG:
         print("[DEBUG] Command: {}".format(command))
 
-    response: str = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
+    response: str = ''
+
+    try:
+        response = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
+    except subprocess.CalledProcessError as error:
+        print("[ERROR] Response: {}".format(error.output))
+        exit(1)
 
     if DEBUG:
         print("[DEBUG] Response: {}".format(response))
