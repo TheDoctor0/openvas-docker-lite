@@ -72,9 +72,12 @@ def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, flo
 
     try:
         response = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
-    except subprocess.CalledProcessError as error:
-        print("[ERROR] Response: {}".format(error.output))
-        exit(1)
+    except subprocess.CalledProcessError as e:
+        error = e.output.decode('utf-8')
+
+        if 'Failed to authenticate.' not in error:
+            print("[ERROR] Response: {}".format(error))
+            exit(1)
 
     if DEBUG:
         print("[DEBUG] Response: {}".format(response))
