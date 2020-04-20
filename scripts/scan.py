@@ -59,6 +59,13 @@ alive_tests: Set[str] = {
 }
 
 
+def check_error(error: str):
+    """Print exception error and exit. Ignore OpenVAS temporary authentication error."""
+    if 'Failed to authenticate.' not in error:
+        print("[ERROR] Response: {}".format(error))
+        exit(1)
+
+
 def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, float, bool, List]:
     """Execute omp command and return its output (optionally xpath can be used to get nested XML element)."""
     global DEBUG
@@ -73,11 +80,7 @@ def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, flo
     try:
         response = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
     except subprocess.CalledProcessError as e:
-        error = e.output.decode('utf-8')
-
-        if 'Failed to authenticate.' not in error:
-            print("[ERROR] Response: {}".format(error))
-            exit(1)
+        check_error(e.output.decode('utf-8'))
 
     if DEBUG:
         print("[DEBUG] Response: {}".format(response))
