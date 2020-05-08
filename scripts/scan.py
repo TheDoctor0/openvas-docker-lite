@@ -116,16 +116,21 @@ def save_report(path: str, report: str) -> None:
     file.close()
 
 
-def get_report(report_id: str, output_format: str) -> str:
+def get_report(report_id: str, output_format: str) -> Union[str, None]:
     """Get generated report. Decode from Base64 if not XML."""
     command: str = "<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
                    "filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\"" + \
                    "details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>"
 
-    if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
-        report: etree.Element = execute_command(command, '//get_reports_response/report')[0]
-    else:
-        report: str = execute_command(command, 'string(//get_reports_response/report/text())')
+    try:
+        if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
+            report: etree.Element = execute_command(command, '//get_reports_response/report')[0]
+        else:
+            report: str = execute_command(command, 'string(//get_reports_response/report/text())')
+    except etree.XMLSyntaxError:
+        print("Generated report is empty!")
+
+        return None
 
     return base64.b64decode(report) if isinstance(report, str) else etree.tostring(report).strip()
 
@@ -199,8 +204,9 @@ def make_scan(scan: Dict[str, str]) -> None:
     report = get_report(report_id, scan['format'])
     print("Generated report.")
 
-    save_report(scan['output'], report)
-    print("Saved report to {}.".format(scan['output']))
+    if report:
+        save_report(scan['output'], report)
+        print("Saved report to {}.".format(scan['output']))
 
     print_logs()
     perform_cleanup()
