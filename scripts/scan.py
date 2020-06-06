@@ -116,7 +116,7 @@ def save_report(path: str, report: str) -> None:
     file.close()
 
 
-def get_report(report_id: str, output_format: str) -> Union[str, None]:
+def get_report(report_id: str, output_format: str) -> Optional[str]:
     """Get generated report. Decode from Base64 if not XML."""
     command: str = "<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
                    "filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\"" + \
@@ -156,6 +156,8 @@ def process_task(task_id: str) -> str:
                 print("Task status: Complete")
         except subprocess.CalledProcessError as exception:
             print("ERROR: ", exception.output)
+        except etree.XMLSyntaxError:
+            print("ERROR: Cannot get task status.")
 
     return etree.XML(task).xpath("string(//report/@id)")
 
