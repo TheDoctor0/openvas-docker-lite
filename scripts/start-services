@@ -1,4 +1,14 @@
 #!/bin/bash
+echo "Disabling THP..."
+if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+   echo never > /sys/kernel/mm/transparent_hugepage/enabled
+fi
+if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
+   echo never > /sys/kernel/mm/transparent_hugepage/defrag
+fi
+sleep 5
+echo "THP disabled."
+
 echo "Starting Redis server..."
 redis-server /etc/redis/redis.conf
 echo "Testing Redis status..."
