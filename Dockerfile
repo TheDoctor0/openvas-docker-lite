@@ -129,8 +129,9 @@ RUN cd ${SRC_PATH}/gvmd-* && \
     rm -rf ${SRC_PATH}/gvmd-*
 
 RUN ldconfig && \
-    sleep 5 && \
+    sleep 10 && \
     greenbone-scapdata-sync && \
+    sleep 10 && \
     greenbone-certdata-sync
 
 RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
