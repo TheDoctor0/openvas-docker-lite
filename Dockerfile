@@ -1,11 +1,11 @@
 FROM debian:buster
 
-ENV GVM_LIBS_VERSION='dbef141' \
-    GVMD_VERSION='fb669bb' \
-    OPENVAS_VERSION='0fd5aa8' \
-    OPENVAS_SMB_VERSION='de43dab' \
-    OSPD_OPENVAS_VERSION='d019f63' \
-    OSPD_VERSION='5170464' \
+ENV GVM_LIBS_VERSION='v11.0.1' \
+    GVMD_VERSION='v9.0.1' \
+    OPENVAS_VERSION='v7.0.1' \
+    OPENVAS_SMB_VERSION='v1.0.5' \
+    OSPD_OPENVAS_VERSION='v1.0.1' \
+    OSPD_VERSION='v2.0.1' \
     SRC_PATH='/src' \
     DEBIAN_FRONTEND=noninteractive \
     TERM=dumb
