@@ -58,6 +58,13 @@ alive_tests: Set[str] = {
 }
 
 
+def check_error(error: str):
+    """Print exception error and exit. Ignore OpenVAS temporary authentication error."""
+    if 'Failed to authenticate.' not in error:
+        print("[ERROR] Response: {}".format(error))
+        exit(1)
+
+
 def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, float, bool, List]:
     """Execute GVMD command and return its output (optionally xpath can be used to get nested XML element)."""
     global DEBUG
@@ -68,7 +75,12 @@ def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, flo
     if DEBUG:
         print("[DEBUG] Command: {}".format(command))
 
-    response: str = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
+    response: str = ''
+
+    try:
+        response = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True).decode().strip()
+    except subprocess.CalledProcessError as e:
+        check_error(e.output.decode('utf-8'))
 
     if DEBUG:
         print("[DEBUG] Response: {}".format(response))
@@ -108,16 +120,21 @@ def save_report(path: str, report: str) -> None:
     file.close()
 
 
-def get_report(report_id: str, output_format: str) -> str:
+def get_report(report_id: str, output_format: str) -> Optional[str]:
     """Get generated report. Decode from Base64 if not XML."""
     command: str = "<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
                    "filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\"" + \
                    "details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>"
 
-    if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
-        report: etree.Element = execute_command(command, '//get_reports_response/report')[0]
-    else:
-        report: str = execute_command(command, 'string(//get_reports_response/report/text())')
+    try:
+        if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
+            report: etree.Element = execute_command(command, '//get_reports_response/report')[0]
+        else:
+            report: str = execute_command(command, 'string(//get_reports_response/report/text())')
+    except etree.XMLSyntaxError:
+        print("Generated report is empty!")
+
+        return None
 
     return base64.b64decode(report) if isinstance(report, str) else etree.tostring(report).strip()
 
@@ -142,7 +159,9 @@ def process_task(task_id: str) -> str:
             else:
                 print("Task status: Complete")
         except subprocess.CalledProcessError as exception:
-            print("[ERROR] ", exception.output)
+            print("ERROR: ", exception.output)
+        except etree.XMLSyntaxError:
+            print("ERROR: Cannot get task status")
 
     return etree.XML(task).xpath("string(//report/@id)")
 
@@ -191,8 +210,9 @@ def make_scan(scan: Dict[str, str]) -> None:
     report = get_report(report_id, scan['format'])
     print("Generated report.")
 
-    save_report(scan['output'], report)
-    print("Saved report to {}.".format(scan['output']))
+    if report:
+        save_report(scan['output'], report)
+        print("Saved report to {}.".format(scan['output']))
 
     print_logs()
     perform_cleanup()
