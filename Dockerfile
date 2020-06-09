@@ -17,7 +17,6 @@ RUN apt-get update && \
         postgresql-server-dev-all \
         python-setuptools \
         git \
-        wget \
         curl \
         python3 \
         python3-pip \
@@ -119,7 +118,7 @@ RUN redis-server /etc/redis/redis.conf && \
     chmod +x /usr/local/bin/greenbone-nvt-sync && \
     ldconfig && \
     sleep 10 && \
-    greenbone-nvt-sync
+    greenbone-nvt-sync --curl --verbose
 
 RUN cd ${SRC_PATH}/gvmd-* && \
     mkdir build && \
@@ -130,9 +129,8 @@ RUN cd ${SRC_PATH}/gvmd-* && \
     rm -rf ${SRC_PATH}/gvmd-*
 
 RUN ldconfig && \
-    sleep 10 && \
+    sleep 5 && \
     greenbone-scapdata-sync && \
-    sleep 10 && \
     greenbone-certdata-sync
 
 RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
