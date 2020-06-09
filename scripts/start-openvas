@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 echo "Starting OSPD..."
-rm -f /var/run/ospd/ospd.pid /var/run/ospd/ospd.sock
-ospd-openvas -l /usr/local/var/log/gvm/ospd.log &
+rm -f /var/run/ospd/ospd.sock
+ospd-openvas -l /usr/local/var/log/gvm/ospd.log --unix-socket /var/run/ospd/ospd.sock &
 echo "OSPD ready."
 
 echo "Pushing plugins to Redis..."
