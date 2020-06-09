@@ -17,6 +17,7 @@ RUN apt-get update && \
         postgresql-server-dev-all \
         python-setuptools \
         git \
+        wget \
         curl \
         python3 \
         python3-pip \
@@ -129,7 +130,6 @@ RUN cd ${SRC_PATH}/gvmd-* && \
     rm -rf ${SRC_PATH}/gvmd-*
 
 RUN ldconfig && \
-    #Problem with long SCAP sync: https://github.com/greenbone/gvmd/issues/822
     sleep 10 && \
     greenbone-scapdata-sync && \
     sleep 10 && \
