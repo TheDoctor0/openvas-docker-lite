@@ -1,10 +1,12 @@
-# OpenVAS Docker Lite [![License](https://img.shields.io/github/license/TheDoctor0/openvas-docker-lite)](https://github.com/TheDoctor0/openvas-docker-lite/blob/master/LICENSE) [![Build Status](https://travis-ci.org/TheDoctor0/openvas-docker-lite.png)](https://travis-ci.org/TheDoctor0/openvas-docker-lite) [![Docker Pulls](https://img.shields.io/docker/pulls/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite)
+# OpenVAS Docker Lite [![License](https://img.shields.io/github/license/TheDoctor0/openvas-docker-lite)](https://github.com/TheDoctor0/openvas-docker-lite/blob/master/LICENSE) [![Build Status](https://travis-ci.org/TheDoctor0/openvas-docker-lite.png)](https://travis-ci.org/TheDoctor0/openvas-docker-lite) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/TheDoctor0/openvas-docker-lite/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/TheDoctor0/openvas-docker-lite/?branch=master) [![Docker Pulls](https://img.shields.io/docker/pulls/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite)
 
 Docker container with automated OpenVAS 10 (GVMD 9) based on the Debian 10 image.
 
 It contains custom automation script that allows to scan selected targets and generate a report with one command.
 
 This is a lite version and it does not include Greenbone Security Assistant - web app for managing OpenVAS.
+
+Older container based on Ubuntu with OpenVAS 9 is available [here](https://github.com/TheDoctor0/openvas-docker-lite/tree/9).
 
 ## Usage
 
