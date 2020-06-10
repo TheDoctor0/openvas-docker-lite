@@ -90,15 +90,15 @@ def execute_command(command: str, xpath: Optional[str] = None) -> Union[str, flo
 
 def perform_cleanup() -> None:
     """Remove all existing tasks and targets."""
-    existing_tasks: List = execute_command("<get_tasks/>", "//get_tasks_response/task")
+    existing_tasks: List = execute_command(r"<get_tasks/>", "//get_tasks_response/task")
 
     for task in existing_tasks:
-        execute_command("<delete_task task_id=\"{}\" ultimate=\"true\"/>".format(task.get("id")))
+        execute_command(r"<delete_task task_id=\"{}\" ultimate=\"true\"/>".format(task.get("id")))
 
-    existing_targets: List = execute_command("<get_targets/>", "//get_targets_response/target")
+    existing_targets: List = execute_command(r"<get_targets/>", "//get_targets_response/target")
 
     for target in existing_targets:
-        execute_command("<delete_target target_id=\"{}\" ultimate=\"true\"/>".format(target.get("id")))
+       execute_command(r"<delete_target target_id=\"{}\" ultimate=\"true\"/>".format(target.get("id")))
 
 
 def print_logs() -> None:
@@ -122,9 +122,9 @@ def save_report(path: str, report: str) -> None:
 
 def get_report(report_id: str, output_format: str) -> Optional[str]:
     """Get generated report. Decode from Base64 if not XML."""
-    command: str = "<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
-                   "filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\"" + \
-                   "details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>"
+    command: str = r"<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
+                   r"filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\"" + \
+                   r"details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>"
 
     try:
         if output_format == 'a994b278-1f62-11e1-96ac-406186ea4fc5':
@@ -148,7 +148,7 @@ def process_task(task_id: str) -> str:
         try:
             time.sleep(10)
 
-            task = execute_command("<get_tasks task_id=\"{}\"/>".format(task_id))
+            task = execute_command(r"<get_tasks task_id=\"{}\"/>".format(task_id))
             status = etree.XML(task).xpath("string(//status/text())")
             progress: int = int(etree.XML(task).xpath("string(//progress/text())"))
 
@@ -168,23 +168,23 @@ def process_task(task_id: str) -> str:
 
 def start_task(task_id) -> None:
     """Start task with specified id."""
-    execute_command("<start_task task_id=\"{}\"/>".format(task_id))
+    execute_command(r"<start_task task_id=\"{}\"/>".format(task_id))
 
 
 def create_task(profile, target_id) -> str:
     """Create new scan task for target."""
-    command: str = "<create_task><name>scan</name>" + \
-                   "<target id=\"{}\"></target>".format(target_id) + \
-                   "<config id=\"{}\"></config></create_task>".format(profile)
+    command: str = r"<create_task><name>scan</name>" + \
+                   r"<target id=\"{}\"></target>".format(target_id) + \
+                   r"<config id=\"{}\"></config></create_task>".format(profile)
 
     return execute_command(command, "string(//create_task_response/@id)")
 
 
 def create_target(scan) -> str:
     """Create new target."""
-    command: str = "<create_target><name>scan</name><hosts>{0}</hosts>".format(scan['target']) + \
-                   "<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
-                   "<live_tests>{}</live_tests></create_target>".format(scan['tests'])
+    command: str = r"<create_target><name>scan</name><hosts>{0}</hosts>".format(scan['target']) + \
+                   r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
+                   r"<live_tests>{}</live_tests></create_target>".format(scan['tests'])
 
     return execute_command(command, "string(//create_target_response/@id)")
 
