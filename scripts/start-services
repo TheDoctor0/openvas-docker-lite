@@ -1,4 +1,13 @@
 #!/bin/bash
+echo "Killing existing processes..."
+ps -ef | grep 'gvmd' | grep -v grep | awk '{print $2}' | xargs -r kill -9 > /dev/null 2>&1
+ps -ef | grep 'ospd-openvas' | grep -v grep | awk '{print $2}' | xargs -r kill -9 > /dev/null 2>&1
+ps -ef | grep 'postgres' | grep -v grep | awk '{print $2}' | xargs -r kill -9 > /dev/null 2>&1
+ps -ef | grep 'redis' | grep -v grep | awk '{print $2}' | xargs -r kill -9 > /dev/null 2>&1
+sleep 1
+rm -f /usr/local/var/run/gvm* /var/run/ospd/ospd.sock /var/run/ospd/ospd.pid
+echo "Existing processes killed..."
+
 echo "Starting Redis server..."
 redis-server /etc/redis/redis.conf
 echo "Testing Redis status..."
