@@ -18,12 +18,13 @@ gvmd --create-user=admin --role=Admin
 gvmd --user=admin --new-password=admin
 echo "User created."
 
-echo "Creating scanner..."
-gvmd --create-scanner="Scanner" --scanner-type="OpenVas" --scanner-host=/run/ospd.sock
-echo "Scanner created."
+echo "Updating default scanner..."
+gvmd --modify-scanner=08b69003-5fc2-4037-a479-93b440211c73 of OpenVAS Default --scanner-host=/var/run/ospd/ospd.sock
+echo "Default scanner updated."
 
 echo "Creating directories..."
 mkdir -p /var/run/ospd
+chmod 777 /var/run/ospd
 echo "Directories created."
 
 start-openvas
