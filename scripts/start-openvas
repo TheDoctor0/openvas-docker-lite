@@ -39,8 +39,9 @@ echo "GVMD ready."
 echo "Synchronizing CERT, SCAP and NVT cache..."
 sleep 30
 X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
-while  [ "${#X}" != 0 ] || [ -e /usr/local/var/run/gvm-syncing-nvts ]; do
+while  [ "${#X}" != 0 ]; do
     sleep 5
     X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
+    echo "Synchronization in progress..."
 done
 echo "CERT, SCAP and NVT cache synchronized."
