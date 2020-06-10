@@ -123,7 +123,7 @@ def save_report(path: str, report: str) -> None:
 def get_report(report_id: str, output_format: str) -> Optional[str]:
     """Get generated report. Decode from Base64 if not XML."""
     command: str = r"<get_reports report_id=\"{}\" format_id=\"{}\" ".format(report_id, output_format) + \
-                   r"filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\"" + \
+                   r"filter=\"apply_overrides=1 overrides=1 notes=1 levels=hmlg\" " + \
                    r"details=\"1\" notes_details=\"1\" result_tags=\"1\" ignore_pagination=\"1\"/>"
 
     try:
