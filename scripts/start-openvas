@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
-echo "Starting OSPD..."
-rm -f /var/run/ospd/ospd.sock
-ospd-openvas -l /usr/local/var/log/gvm/ospd.log --unix-socket /var/run/ospd/ospd.sock &
-echo "OSPD ready."
-
 echo "Pushing plugins to Redis..."
+openvas -u
 sleep 5
 X="$(ps -aux | grep -v grep | grep 'openvas: Reloaded')"
 while  [ "${#X}" != 0 ]; do
@@ -13,15 +9,24 @@ while  [ "${#X}" != 0 ]; do
 done
 echo "Plugins pushed to Redis."
 
+echo "Starting OSPD..."
+ospd-openvas --log-file=/usr/local/var/log/gvm/ospd.log \
+    --log-level=DEBUG \
+    --unix-socket=/var/run/ospd/ospd.sock \
+    --pid-file=/var/run/ospd/ospd.pid \
+    --lock-file-dir=/var/run/ospd &
+echo "OSPD ready."
+
 echo "Waiting for OSPD socket..."
 sleep 5
-while [ ! -e /var/run/ospd/ospd.sock ]; do
+while [ ! -e /var/run/ospd/ospd.sock ] || [ -e /usr/local/var/run/feed-update.lock ]; do
   sleep 1
 done
 echo "OSPD socket ready."
 
 echo "Starting GVMD..."
-gvmd --listen-group=service --listen-owner=service --osp-vt-update=/var/run/ospd/ospd.sock
+gvmd --listen-group=service --listen-owner=service \
+     --osp-vt-update=/var/run/ospd/ospd.sock
 echo "Testing GVMD status..."
 sleep 5
 X="$(ps -aux | grep -v grep | grep 'gvmd: Waiting')"
@@ -34,8 +39,8 @@ echo "GVMD ready."
 echo "Synchronizing CERT, SCAP and NVT cache..."
 sleep 30
 X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
-while  [ "${#X}" != 0 ]; do
-    sleep 1
+while  [ "${#X}" != 0 ] || [ -e /usr/local/var/run/gvm-syncing-nvts ]; do
+    sleep 5
     X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
 done
 echo "CERT, SCAP and NVT cache synchronized."
