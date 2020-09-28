@@ -19,10 +19,18 @@ echo "OSPD ready."
 
 echo "Waiting for OSPD socket..."
 sleep 5
-while [ ! -e /var/run/ospd/ospd.sock ] || [ -e /usr/local/var/run/feed-update.lock ]; do
+while [ ! -e /var/run/ospd/ospd.sock ]; do
   sleep 1
 done
 echo "OSPD socket ready."
+
+echo "Waiting for OSPD lock file release..."
+X=$(grep -q "Removed lock from file /var/run/ospd/feed-update.lock" /usr/local/var/log/gvm/ospd.log)$?
+while [ $X -ne 0 ]; do
+  sleep 1
+  X=$(grep -q "Removed lock from file /var/run/ospd/feed-update.lock" /usr/local/var/log/gvm/ospd.log)$?
+done
+echo "OSPD released lock"
 
 echo "Starting GVMD..."
 gvmd --listen-group=service --listen-owner=service \
@@ -36,12 +44,21 @@ while  [ "${#X}" == 0 ]; do
 done
 echo "GVMD ready."
 
-echo "Synchronizing CERT, SCAP and NVT cache..."
+echo "Synchronizing GVMD_DATA, CERT, SCAP and NVT cache..."
 sleep 30
-X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
+X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing GVMD_DATA\|gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
 while  [ "${#X}" != 0 ]; do
     sleep 5
-    X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
+    X="$(ps -aux | grep -v grep | grep 'gvmd: Syncing GVMD_DATA\|gvmd: Syncing CERT\|gvmd: Syncing SCAP\|gvmd: Reloading NVTs')"
     echo "Synchronization in progress..."
 done
-echo "CERT, SCAP and NVT cache synchronized."
+echo "GVMD_DATA, CERT, SCAP and NVT cache synchronized."
+
+echo "Making sure that configs are loaded to gmvd DB..."
+X="$(psql  -d gvmd -c "SELECT count(*) FROM configs " |grep -A1 "\-\-" |tail -1 |tr -d " ")"
+while  [ "${X}" == 0 ]; do
+    sleep 5
+    X="$(psql  -d gvmd -c "SELECT count(*) FROM configs " |grep -A1 "\-\-" |tail -1 |tr -d " ")"
+    echo "Waiting for configs to get loaded to DB..."
+done
+echo "Configs table in gmvd DB has been populated with $X values"

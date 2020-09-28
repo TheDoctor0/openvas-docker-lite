@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Automation script for OpenVAS 10."""
+"""Automation script for Greenbone scanner 20.08."""
 
 import subprocess
 import argparse
@@ -29,19 +29,17 @@ scan_profiles: Dict[str, str] = {
 
 report_formats: Dict[str, str] = {
     "Anonymous XML": "5057e5cc-b825-11e4-9d0e-28d24461215b",
-    "ARF": "910200ca-dc05-11e1-954f-406186ea4fc5",
-    "CPE": "5ceff8ba-1f62-11e1-ab9f-406186ea4fc5",
-    "CSV Hosts": "9087b18c-626c-11e3-8892-406186ea4fc5",
     "CSV Results": "c1645568-627a-11e3-a660-406186ea4fc5",
     "ITG": "77bd6c4a-1f62-11e1-abf0-406186ea4fc5",
-    "LaTeX": "a684c02c-b531-11e1-bdc2-406186ea4fc5",
-    "NBE": "9ca6fe72-1f62-11e1-9e7c-406186ea4fc5",
     "PDF": "c402cc3e-b531-11e1-9163-406186ea4fc5",
-    "Topology SVG": "9e5e5deb-879e-4ecc-8be6-a71cd0875cdd",
     "TXT": "a3810a62-1f62-11e1-9219-406186ea4fc5",
-    "Verinice ISM": "c15ad349-bd8d-457a-880a-c7056532ee15",
-    "Verinice ITG": "50c9950a-f326-11e4-800c-28d24461215b",
     "XML": "a994b278-1f62-11e1-96ac-406186ea4fc5"
+}
+
+scan_ports: Dict[str, str] = {
+    "All IANA Assigned TCP": "33d0cd82-57c6-11e1-8ed1-406186ea4fc5",
+    "All IANA Assigned TCP and UDP": "4a4717fe-57d2-11e1-9a26-406186ea4fc5",
+    "All TCP and Nmap top 100 UDP": "730ef368-57e2-11e1-a90f-406186ea4fc5",
 }
 
 alive_tests: Set[str] = {
@@ -183,6 +181,7 @@ def create_task(profile, target_id) -> str:
 def create_target(scan) -> str:
     """Create new target."""
     command: str = r"<create_target><name>scan</name><hosts>{0}</hosts>".format(scan['target']) + \
+                   r"<port_list id=\"{}\"></port_list>".format(scan['port_list_id']) + \
                    r"<exclude_hosts>{}</exclude_hosts>".format(scan['exclude']) + \
                    r"<live_tests>{}</live_tests></create_target>".format(scan['tests'])
 
@@ -248,6 +247,7 @@ def start_scan(args: argparse.Namespace) -> None:
     print("* Target: {}".format(args.target))
     print("* Excluded hosts: {}".format(args.exclude))
     print("* Scan profile: {}".format(args.profile))
+    print("* Scan ports: {}".format(args.ports))
     print("* Alive tests: {}".format(args.tests))
     print("* Max hosts: {}".format(args.hosts))
     print("* Max checks: {}".format(args.checks))
@@ -255,8 +255,8 @@ def start_scan(args: argparse.Namespace) -> None:
     print("* Output file: {}\n".format(args.output))
 
     make_scan({'target': args.target, 'exclude': args.exclude, 'tests': args.tests.replace("&", "&amp;"),
-               'profile': scan_profiles[args.profile], 'format': report_formats[args.format],
-               'output': "/reports/" + args.output})
+               'profile': scan_profiles[args.profile], 'port_list_id': scan_ports[args.ports],
+               'format': report_formats[args.format], 'output': "/reports/" + args.output})
 
 
 def report_format(arg: Optional[str]) -> str:
@@ -271,6 +271,13 @@ def scan_profile(arg: Optional[str]) -> str:
     """Check if scan profile value is valid."""
     if arg not in scan_profiles:
         raise argparse.ArgumentTypeError("Specified scan profile is invalid!")
+
+    return arg
+
+def scan_ports_option(arg: Optional[str]) -> str:
+    """Check if scan ports value is valid."""
+    if arg not in scan_ports:
+        raise argparse.ArgumentTypeError("Specified scan ports option is invalid!")
 
     return arg
 
@@ -316,10 +323,12 @@ def parse_arguments():
     parser.add_argument('target', help='scan target')
     parser.add_argument('-o', '--output', help='output file (default: openvas.report)',
                         default="openvas.report", required=False)
-    parser.add_argument('-f', '--format', help='format for report (default: ARF)',
-                        default="ARF", type=report_format, required=False)
-    parser.add_argument('-p', '--profile', help='scan profile (default: Full and fast)',
+    parser.add_argument('-f', '--format', help='format for report (default: XML)',
+                        default="XML", type=report_format, required=False)
+    parser.add_argument('-p', '--profile', help='scan profile (default: )',
                         default="Full and fast", type=scan_profile, required=False)
+    parser.add_argument('-P', '--ports', help='scan ports (default: All TCP and Nmap top 100 UDP)',
+                        default="All TCP and Nmap top 100 UDP", type=scan_ports_option, required=False)
     parser.add_argument('-t', '--tests', help='alive tests (default: ICMP, TCP-ACK Service & ARP Ping)',
                         default="ICMP, TCP-ACK Service & ARP Ping", type=alive_test, required=False)
     parser.add_argument('-e', '--exclude', help='hosts excluded from scan target (Default: "")',
