@@ -118,7 +118,7 @@ RUN redis-server /etc/redis/redis.conf && \
     chmod +x /usr/local/bin/greenbone-nvt-sync && \
     ldconfig && \
     sleep 10 && \
-    greenbone-nvt-sync --verbose
+    greenbone-nvt-sync
 
 RUN cd ${SRC_PATH}/gvmd-* && \
     mkdir build && \
