@@ -29,7 +29,7 @@ After that, the scan script will run and the progress will be displayed in the c
 
 #### Target
 
-Target can be a single IP or a comma separated list of IP addresses.
+Target can be a single IP or CIDR or a comma separated list of IP addresses or CIDRs.
 
 #### Output
 
