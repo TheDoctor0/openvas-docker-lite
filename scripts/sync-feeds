@@ -54,7 +54,7 @@ RSYNC_CHMOD="--perms --chmod=Fugo+r,Fug+w,Dugo-s,Dugo+rx,Dug+w"
 RSYNC_VERBOSE="-q"
 
 # RSYNC_OPTIONS controls the general parameters for the rsync connection.
-RSYNC_OPTIONS="--links --times --omit-dir-times $RSYNC_VERBOSE --recursive --partial --progress"
+RSYNC_OPTIONS="--links --times --omit-dir-times $RSYNC_VERBOSE --recursive --partial"
 
 # Script and feed information which will be made available to user through
 # command line options and automated tools.
