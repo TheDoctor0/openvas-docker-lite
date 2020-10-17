@@ -60,12 +60,13 @@ RUN apt-get update && \
     apt-get install texlive-fonts-recommended -yq && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install lxml && \
-    pip3 install gvm-tools && \
-    pip3 install paramiko && \
-    pip3 install defusedxml && \
-    pip3 install redis && \
-    pip3 install psutil
+RUN pip3 install \
+        lxml \
+        gvm-tools \
+        paramiko \
+        defusedxml \
+        redis \
+        psutil
 
 RUN mkdir ${SRC_PATH} -p && \
     cd ${SRC_PATH} && \
