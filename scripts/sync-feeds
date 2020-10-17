@@ -309,7 +309,7 @@ is_feed_current () {
       fi
     fi
 
-    rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD "$feeduser"plugin_feed_info.inc $FEED_INFO_TEMP_DIR
+    rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD "$feeduser"plugin_feed_info.inc $FEED_INFO_TEMP_DIR >/dev/null 2>&1
 
     if [ $? -ne 0 ]
     then
@@ -415,12 +415,12 @@ sync_nvts(){
           RSYNC_SSH_PROXY_CMD="-o \"ProxyCommand corkscrew $gsmproxy %h %p\""
         fi
       fi
-      rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" --exclude=plugin_feed_info.inc $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD $feeduser $NVT_DIR
+      rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" --exclude=plugin_feed_info.inc $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD $feeduser $NVT_DIR >/dev/null 2>&1
       if [ $? -ne 0 ]  ; then
         log_err "rsync failed, aborting synchronization."
         exit 1
       fi
-      rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD "$feeduser"plugin_feed_info.inc $NVT_DIR
+      rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD "$feeduser"plugin_feed_info.inc $NVT_DIR >/dev/null 2>&1
       if [ $? -ne 0 ]  ; then
         log_err "rsync failed, aborting synchronization."
         exit 1
