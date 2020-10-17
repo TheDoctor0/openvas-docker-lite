@@ -50,11 +50,8 @@ RSYNC_COMPRESS="--compress-level=9"
 # RSYNC_CHMOD specifies the permissions to chmod the files to.
 RSYNC_CHMOD="--perms --chmod=Fugo+r,Fug+w,Dugo-s,Dugo+rx,Dug+w"
 
-# Verbosity flag for rsync. "-q" means a quiet rsync, "-v" a verbose rsync.
-RSYNC_VERBOSE="-q"
-
 # RSYNC_OPTIONS controls the general parameters for the rsync connection.
-RSYNC_OPTIONS="--links --times --omit-dir-times $RSYNC_VERBOSE --recursive --partial"
+RSYNC_OPTIONS="--links --times --omit-dir-times --quiet --recursive --partial"
 
 # Script and feed information which will be made available to user through
 # command line options and automated tools.
@@ -312,7 +309,7 @@ is_feed_current () {
       fi
     fi
 
-    rsync -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD "$feeduser"plugin_feed_info.inc $FEED_INFO_TEMP_DIR
+    rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD "$feeduser"plugin_feed_info.inc $FEED_INFO_TEMP_DIR
 
     if [ $? -ne 0 ]
     then
@@ -418,12 +415,12 @@ sync_nvts(){
           RSYNC_SSH_PROXY_CMD="-o \"ProxyCommand corkscrew $gsmproxy %h %p\""
         fi
       fi
-      rsync -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" --exclude=plugin_feed_info.inc $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD $feeduser $NVT_DIR
+      rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" --exclude=plugin_feed_info.inc $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD $feeduser $NVT_DIR
       if [ $? -ne 0 ]  ; then
         log_err "rsync failed, aborting synchronization."
         exit 1
       fi
-      rsync -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD "$feeduser"plugin_feed_info.inc $NVT_DIR
+      rsync -q -e "ssh $RSYNC_SSH_OPTS $RSYNC_SSH_PROXY_CMD -p $PORT -i $TEMP_ACCESS_KEY" $RSYNC_OPTIONS $RSYNC_DELETE $RSYNC_COMPRESS $RSYNC_CHMOD "$feeduser"plugin_feed_info.inc $NVT_DIR
       if [ $? -ne 0 ]  ; then
         log_err "rsync failed, aborting synchronization."
         exit 1
@@ -525,7 +522,6 @@ do_help () {
   echo " --identify     display information"
   echo " --nvtdir dir   set dir as NVT directory"
   echo " --selftest     perform self-test and set exit code"
-  echo " --verbose      makes the sync process print details"
   echo " --version      display version"
   echo ""
   echo ""
@@ -571,9 +567,6 @@ while test $# -gt 0; do
     --feedcurrent)
       is_feed_current
       exit $?
-      ;;
-    --verbose)
-      RSYNC_VERBOSE="-v"
       ;;
   esac
   shift
