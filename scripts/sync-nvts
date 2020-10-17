@@ -1,0 +1,9 @@
+#!/bin/bash
+greenbone-nvt-sync > /dev/null 2>&1 &
+
+echo "Syncing NVT feed..."
+sleep 30
+while [ -e /usr/local/var/run/feed-update.lock ]; do
+  echo "Syncing NVT feed in progress..."
+  sleep 30
+done

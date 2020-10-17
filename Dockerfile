@@ -1,4 +1,3 @@
-FROM thedoctor0/openvas-docker-lite:10
 FROM debian:buster
 
 ENV GVM_LIBS_VERSION='v11.0.1' \
@@ -111,19 +110,22 @@ RUN cd ${SRC_PATH}/openvas* && \
     rm -rf ${SRC_PATH}/openvas*
 
 COPY configs/redis.conf /etc/redis/redis.conf
-COPY scripts/sync-feeds /usr/local/bin/greenbone-nvt-sync
-
-COPY --from=0 /usr/local/var/lib/openvas/plugins /usr/local/var/lib/openvas/plugins
-COPY --from=0 /usr/local/var/lib/gvm /usr/local/var/lib/gvm
+COPY scripts/sync-nvts /usr/local/bin/sync-nvts
+COPY scripts/sync-scap /usr/local/bin/sync-scap
+COPY scripts/sync-certs /usr/local/bin/sync-certs
+COPY scripts/greenbone-nvt-sync /usr/local/bin/greenbone-nvt-sync
 
 RUN adduser service --gecos "service,service,service,service" --disabled-password && \
     echo "service:service" | sudo chpasswd
 
 RUN redis-server /etc/redis/redis.conf && \
     chmod +x /usr/local/bin/greenbone-nvt-sync && \
+    chmod +x /usr/local/bin/sync-nvts && \
+    chmod +x /usr/local/bin/sync-scap && \
+    chmod +x /usr/local/bin/sync-certs && \
     ldconfig && \
     sleep 10 && \
-    greenbone-nvt-sync
+    sync-nvts
 
 RUN cd ${SRC_PATH}/gvmd-* && \
     mkdir build && \
@@ -135,9 +137,9 @@ RUN cd ${SRC_PATH}/gvmd-* && \
 
 RUN ldconfig && \
     sleep 10 && \
-    greenbone-scapdata-sync && \
+    sync-scap && \
     sleep 10 && \
-    greenbone-certdata-sync
+    sync-certs
 
 RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
     cd impacket/ && \
