@@ -1,3 +1,4 @@
+FROM thedoctor0/openvas-docker-lite:10
 FROM debian:buster
 
 ENV GVM_LIBS_VERSION='v11.0.1' \
@@ -110,6 +111,9 @@ RUN cd ${SRC_PATH}/openvas* && \
 
 COPY configs/redis.conf /etc/redis/redis.conf
 COPY scripts/sync-feeds /usr/local/bin/greenbone-nvt-sync
+
+COPY --from=0 /usr/local/var/lib/openvas/plugins /usr/local/var/lib/openvas/plugins
+COPY --from=0 /usr/local/var/lib/gvm /usr/local/var/lib/gvm
 
 RUN adduser service --gecos "service,service,service,service" --disabled-password && \
     echo "service:service" | sudo chpasswd
