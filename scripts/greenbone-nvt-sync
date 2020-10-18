@@ -509,6 +509,7 @@ do_sync ()
       date > $OPENVAS_FEED_LOCK_PATH
       sync_nvts
       echo -n $OPENVAS_FEED_LOCK_PATH
+      rm $OPENVAS_FEED_LOCK_PATH
     )9>>$OPENVAS_FEED_LOCK_PATH
   fi
 }
