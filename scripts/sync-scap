@@ -1,5 +1,5 @@
 #!/bin/bash
-greenbone-scapdata-sync > /dev/null 2>&1 &
+#greenbone-scapdata-sync > /dev/null 2>&1 &
 
 echo "Syncing SCAP feed..."
 sleep 30
