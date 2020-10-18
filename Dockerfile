@@ -142,9 +142,9 @@ RUN chmod +x /usr/local/sbin/greenbone-certdata-sync && \
     chmod +x /usr/local/bin/sync-certs && \
     ldconfig && \
     sleep 10 && \
-    sync-scap && \
+    sync-certs && \
     sleep 10 && \
-    sync-certs
+    sync-scap
 
 RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
     cd impacket/ && \
