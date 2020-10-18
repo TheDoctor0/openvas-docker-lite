@@ -4,9 +4,9 @@ start-services
 echo "Syncing OpenVAS feeds..."
 sync-nvts
 sleep 10
-greenbone-scap
+sync-scap
 sleep 10
-greenbone-certs
+sync-certs
 echo "OpenVAS feeds synced."
 
 start-openvas
