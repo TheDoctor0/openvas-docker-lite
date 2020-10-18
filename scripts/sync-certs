@@ -3,7 +3,7 @@ greenbone-certdata-sync > /dev/null 2>&1 &
 
 echo "Syncing CERTS feed..."
 sleep 30
-while [ -e /usr/local/var/run/feed-update.lock ]; do
+while [ -e /tmp/gvm-sync-cert ]; do
   echo "Syncing CERTS feed in progress..."
   sleep 30
 done
