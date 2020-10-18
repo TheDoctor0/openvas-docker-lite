@@ -111,22 +111,14 @@ RUN cd ${SRC_PATH}/openvas* && \
 
 COPY configs/redis.conf /etc/redis/redis.conf
 COPY scripts/sync-nvts /usr/local/bin/sync-nvts
-COPY scripts/sync-scap /usr/local/bin/sync-scap
-COPY scripts/sync-certs /usr/local/bin/sync-certs
 COPY scripts/greenbone-nvt-sync /usr/local/bin/greenbone-nvt-sync
-COPY scripts/greenbone-certdata-sync /usr/local/sbin/greenbone-certdata-sync
-COPY scripts/greenbone-scapdata-sync /usr/local/sbin/greenbone-scapdata-sync
 
 RUN adduser service --gecos "service,service,service,service" --disabled-password && \
     echo "service:service" | sudo chpasswd
 
 RUN redis-server /etc/redis/redis.conf && \
     chmod +x /usr/local/bin/greenbone-nvt-sync && \
-    chmod +x /usr/local/sbin/greenbone-certdata-sync && \
-    chmod +x /usr/local/sbin/greenbone-scapdata-sync && \
     chmod +x /usr/local/bin/sync-nvts && \
-    chmod +x /usr/local/bin/sync-scap && \
-    chmod +x /usr/local/bin/sync-certs && \
     ldconfig && \
     sleep 10 && \
     sync-nvts
@@ -139,7 +131,16 @@ RUN cd ${SRC_PATH}/gvmd-* && \
     make install && \
     rm -rf ${SRC_PATH}/gvmd-*
 
-RUN ldconfig && \
+COPY scripts/sync-scap /usr/local/bin/sync-scap
+COPY scripts/sync-certs /usr/local/bin/sync-certs
+COPY scripts/greenbone-certdata-sync /usr/local/sbin/greenbone-certdata-sync
+COPY scripts/greenbone-scapdata-sync /usr/local/sbin/greenbone-scapdata-sync
+
+RUN chmod +x /usr/local/sbin/greenbone-certdata-sync && \
+    chmod +x /usr/local/sbin/greenbone-scapdata-sync && \
+    chmod +x /usr/local/bin/sync-scap && \
+    chmod +x /usr/local/bin/sync-certs && \
+    ldconfig && \
     sleep 10 && \
     sync-scap && \
     sleep 10 && \
