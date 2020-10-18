@@ -1,3 +1,4 @@
+FROM thedoctor0/openvas-docker-lite:10
 FROM debian:buster
 
 ENV GVM_LIBS_VERSION='v11.0.1' \
@@ -109,6 +110,7 @@ RUN cd ${SRC_PATH}/openvas* && \
     make install && \
     rm -rf ${SRC_PATH}/openvas*
 
+COPY --from=0 /usr/local/var/lib/openvas/plugins /usr/local/var/lib/openvas/plugins
 COPY configs/redis.conf /etc/redis/redis.conf
 COPY scripts/sync-nvts /usr/local/bin/sync-nvts
 COPY scripts/greenbone-nvt-sync /usr/local/bin/greenbone-nvt-sync
@@ -131,6 +133,8 @@ RUN cd ${SRC_PATH}/gvmd-* && \
     make install && \
     rm -rf ${SRC_PATH}/gvmd-*
 
+COPY --from=0 /usr/local/var/lib/gvm/scap-data /usr/local/var/lib/gvm/scap-data
+COPY --from=0 /usr/local/var/lib/gvm/cert-data /usr/local/var/lib/gvm/cert-data
 COPY scripts/sync-scap /usr/local/bin/sync-scap
 COPY scripts/sync-certs /usr/local/bin/sync-certs
 COPY scripts/greenbone-certdata-sync /usr/local/sbin/greenbone-certdata-sync
