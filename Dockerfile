@@ -177,7 +177,6 @@ RUN mkdir reports && \
     chmod 777 reports && \
     mkdir /var/run/ospd && \
     chmod 777 /var/run/ospd && \
-    chmod 777 /usr/local/var/lib/gvm/gvmd/report_formats && \
     chmod +x /usr/local/bin/start-services && \
     chmod +x /usr/local/bin/start-openvas && \
     chmod +x /usr/local/bin/start-scanner && \
@@ -193,4 +192,5 @@ RUN bash /configure-scanner && \
     rm -rf /usr/local/var/log/gvm/*.log && \
     rm -rf  /usr/local/var/run/feed-update.lock && \
     /etc/init.d/postgresql stop && \
-    /etc/init.d/redis-server stop
+    /etc/init.d/redis-server stop &&
+    chmod 777 /usr/local/var/lib/gvm/gvmd/report_formats
