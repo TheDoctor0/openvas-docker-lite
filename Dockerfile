@@ -192,5 +192,5 @@ RUN bash /configure-scanner && \
     rm -rf /usr/local/var/log/gvm/*.log && \
     rm -rf  /usr/local/var/run/feed-update.lock && \
     /etc/init.d/postgresql stop && \
-    /etc/init.d/redis-server stop &&
+    /etc/init.d/redis-server stop && \
     chmod 777 /usr/local/var/lib/gvm/gvmd/report_formats
