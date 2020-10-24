@@ -3,5 +3,5 @@ services:
 
 script:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-- docker build -t $DOCKER_USERNAME/openvas-docker-lite:10 -t $DOCKER_USERNAME/openvas-docker-lite .
+- docker build -t $DOCKER_USERNAME/openvas-docker-lite:10
 - docker push $DOCKER_USERNAME/openvas-docker-lite
