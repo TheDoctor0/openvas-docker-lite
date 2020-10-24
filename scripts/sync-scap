@@ -1,0 +1,9 @@
+#!/bin/bash
+greenbone-scapdata-sync > /dev/null 2>&1 &
+
+echo "Syncing SCAP feed..."
+sleep 30
+while [ -e /tmp/gvm-sync-scap ]; do
+  echo "Syncing SCAP feed in progress..."
+  sleep 30
+done

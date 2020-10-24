@@ -2,14 +2,11 @@
 start-services
 
 echo "Syncing OpenVAS feeds..."
-greenbone-nvt-sync
-#Problem with long SCAP sync: https://github.com/greenbone/gvmd/issues/822
+sync-nvts
 sleep 10
-greenbone-feed-sync --type GVMD_DATA
-sleep 10 
-greenbone-scapdata-sync
+sync-certs
 sleep 10
-greenbone-certdata-sync
+sync-scap
 echo "OpenVAS feeds synced."
 
 start-openvas
