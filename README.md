@@ -1,6 +1,6 @@
 # OpenVAS Docker Lite [![License](https://img.shields.io/github/license/TheDoctor0/openvas-docker-lite)](https://github.com/TheDoctor0/openvas-docker-lite/blob/master/LICENSE) [![Build Status](https://travis-ci.org/TheDoctor0/openvas-docker-lite.png)](https://travis-ci.org/TheDoctor0/openvas-docker-lite) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/TheDoctor0/openvas-docker-lite/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/TheDoctor0/openvas-docker-lite/?branch=master) [![Docker Pulls](https://img.shields.io/docker/pulls/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite)
 
-Docker container with automated OpenVAS 20.08 (GVMD 20.08) based on the Debian 10 image.
+Docker container with automated OpenVAS 20.8.0 (GVMD 20.8.0) based on the Debian 10 image.
 
 It contains custom automation script that allows to scan selected targets and generate a report with one command.
 
@@ -130,4 +130,4 @@ Feeds update is quite slow, so it will take significantly more time.
 ## Credits
 - Mike Splain for creating the original OpenVAS docker image
 - ICTU team for creating the base automation script for OpenVAS
-- Eugene Merlinsky for adjusting the project to work with Greenbone 20.08
+- Eugene Merlinsky for adjusting the project to work with Greenbone 20.8.0
