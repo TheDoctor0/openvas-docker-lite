@@ -1,4 +1,4 @@
-FROM thedoctor0/openvas-docker-lite:10
+FROM thedoctor0/openvas-docker-lite
 FROM debian:buster
 
 ENV GVM_LIBS_VERSION='v20.8.0' \

@@ -77,7 +77,7 @@ fi
 
 VERSION=20.8.0
 
-[ -r ${SYSCONFDIR}/gvm/greenbone-feed-sync.conf ] && . ${SYSCONFDIR}/gvm/greenbone-feed-sync.conf
+[ -r /usr/local/etc/gvm/greenbone-feed-sync.conf ] && . /usr/local/etc/gvm/greenbone-feed-sync.conf
 
 ACCESSKEY="/usr/local/etc/gvm/gsf-access-key"
 
@@ -141,10 +141,10 @@ init_feed_type () {
     exit 1
   elif [ "CERT" = "$FEED_TYPE" ]
   then
-    [ -r "${SYSCONFDIR}/gvm/greenbone-certdata-sync.conf" ] && . "${SYSCONFDIR}/gvm/greenbone-certdata-sync.conf"
+    [ -r "/usr/local/etc/gvm/greenbone-certdata-sync.conf" ] && . "/usr/local/etc/gvm/greenbone-certdata-sync.conf"
 
     FEED_TYPE_LONG="CERT data"
-    FEED_DIR="${GVM_STATE_DIR}/cert-data"
+    FEED_DIR="/usr/local/var/lib/gvm/cert-data"
     TIMESTAMP="$FEED_DIR/timestamp"
     SCRIPT_ID="CERTSYNC"
 
@@ -169,10 +169,10 @@ init_feed_type () {
     fi
   elif [ "SCAP" = "$FEED_TYPE" ]
   then
-    [ -r "${SYSCONFDIR}/gvm/greenbone-scapdata-sync.conf" ] && . "${SYSCONFDIR}/gvm/greenbone-scapdata-sync.conf"
+    [ -r "/usr/local/etc/gvm/greenbone-scapdata-sync.conf" ] && . "/usr/local/etc/gvm/greenbone-scapdata-sync.conf"
 
     FEED_TYPE_LONG="SCAP data"
-    FEED_DIR="${GVM_STATE_DIR}/scap-data"
+    FEED_DIR="/usr/local/var/lib/gvm/scap-data"
     TIMESTAMP="$FEED_DIR/timestamp"
     SCRIPT_ID="SCAPSYNC"
 
@@ -197,10 +197,10 @@ init_feed_type () {
     fi
   elif [ "GVMD_DATA" = "$FEED_TYPE" ]
   then
-    [ -r "${SYSCONFDIR}/gvm/greenbone-data-objects-sync.conf" ] && . "${SYSCONFDIR}/gvm/greenbone-data-objects-sync.conf"
+    [ -r "/usr/local/etc/gvm/greenbone-data-objects-sync.conf" ] && . "/usr/local/etc/gvm/greenbone-data-objects-sync.conf"
 
     FEED_TYPE_LONG="gvmd Data"
-    FEED_DIR="${DATA_OBJECTS_FEED_DIR}/gvmd"
+    FEED_DIR="/usr/local/var/lib/gvm/data-objects/gvmd"
     TIMESTAMP="$FEED_DIR/timestamp"
     SCRIPT_ID="GVMD_DATA_SYNC"
 
