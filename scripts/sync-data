@@ -1,0 +1,9 @@
+#!/bin/bash
+greenbone-feed-sync --type GVMD_DATA > /dev/null 2>&1 &
+
+echo "Syncing GVMD Data feed..."
+sleep 30
+while [ -e /usr/local/var/run/feed-update.lock ]; do
+  echo "Syncing GVMD Data feed in progress..."
+  sleep 30
+done

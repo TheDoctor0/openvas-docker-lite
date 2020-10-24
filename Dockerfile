@@ -140,14 +140,20 @@ COPY --from=0 /usr/local/var/lib/gvm/scap-data /usr/local/var/lib/gvm/scap-data
 COPY --from=0 /usr/local/var/lib/gvm/cert-data /usr/local/var/lib/gvm/cert-data
 COPY scripts/sync-scap /usr/local/bin/sync-scap
 COPY scripts/sync-certs /usr/local/bin/sync-certs
+COPY scripts/sync-data /usr/local/bin/sync-data
 COPY scripts/greenbone-certdata-sync /usr/local/sbin/greenbone-certdata-sync
 COPY scripts/greenbone-scapdata-sync /usr/local/sbin/greenbone-scapdata-sync
+COPY scripts/greenbone-feed-sync /usr/local/sbin/greenbone-feed-sync
 
 RUN chmod +x /usr/local/sbin/greenbone-certdata-sync && \
     chmod +x /usr/local/sbin/greenbone-scapdata-sync && \
+    chmod +x /usr/local/sbin/greenbone-feed-sync && \
     chmod +x /usr/local/bin/sync-scap && \
     chmod +x /usr/local/bin/sync-certs && \
+    chmod +x /usr/local/bin/sync-data && \
     ldconfig && \
+    sleep 10 && \
+    sync-data && \
     sleep 10 && \
     sync-certs && \
     sleep 10 && \
@@ -171,6 +177,7 @@ RUN mkdir reports && \
     chmod 777 reports && \
     mkdir /var/run/ospd && \
     chmod 777 /var/run/ospd && \
+    chmod 777 /usr/local/var/lib/gvm/gvmd/report_formats && \
     chmod +x /usr/local/bin/start-services && \
     chmod +x /usr/local/bin/start-openvas && \
     chmod +x /usr/local/bin/start-scanner && \
@@ -186,5 +193,4 @@ RUN bash /configure-scanner && \
     rm -rf /usr/local/var/log/gvm/*.log && \
     rm -rf  /usr/local/var/run/feed-update.lock && \
     /etc/init.d/postgresql stop && \
-    /etc/init.d/redis-server stop && \
-    chmod +777  /usr/local/var/lib/gvm/gvmd/report_formats
+    /etc/init.d/redis-server stop
