@@ -6,7 +6,9 @@ It contains custom automation script that allows to scan selected targets and ge
 
 This is a lite version and it does not include Greenbone Security Assistant - web app for managing OpenVAS.
 
-Older container based on Ubuntu with OpenVAS 9 is available [here](https://github.com/TheDoctor0/openvas-docker-lite/tree/9).
+Previous version with OpenVAS 10 is available [here](https://github.com/TheDoctor0/openvas-docker-lite/tree/10).
+
+Oldest container based on Ubuntu with OpenVAS 9 is available [here](https://github.com/TheDoctor0/openvas-docker-lite/tree/9).
 
 ## Usage
 
