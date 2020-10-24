@@ -1,17 +1,17 @@
 FROM thedoctor0/openvas-docker-lite:10
 FROM debian:buster
 
-ENV GVM_LIBS_VERSION='v11.0.1' \
-    GVMD_VERSION='v9.0.1' \
-    OPENVAS_VERSION='v7.0.1' \
+ENV GVM_LIBS_VERSION='v20.8.0' \
+    GVMD_VERSION='v20.8.0' \
+    OPENVAS_VERSION='v20.8.0' \
     OPENVAS_SMB_VERSION='v1.0.5' \
-    OSPD_OPENVAS_VERSION='v1.0.1' \
-    OSPD_VERSION='v2.0.1' \
+    OSPD_OPENVAS_VERSION='v20.8.0' \
+    OSPD_VERSION='v20.8.1' \
     SRC_PATH='/src' \
     DEBIAN_FRONTEND=noninteractive \
     TERM=dumb
 
-RUN apt-get update && \
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils && \
     apt-get install \
         postgresql \
         postgresql-contrib \
@@ -19,10 +19,10 @@ RUN apt-get update && \
         python-setuptools \
         git \
         curl \
+        doxygen \
         python3 \
         python3-pip \
-        python-pip \
-        python-dev \
+        python3-dev \
         rsync \
         nmap \
         snmp \
@@ -30,19 +30,23 @@ RUN apt-get update && \
         redis-server \
         cmake \
         pkg-config \
+        libradcli-dev \
         libglib2.0-dev \
+        libgpgme-dev \
         libgpgme11-dev \
         libgnutls28-dev \
         libssh-gcrypt-dev \
         libldap2-dev \
         libhiredis-dev \
         libpcap-dev \
+        libpq-dev \
         libksba-dev \
         libsnmp-dev \
         libical-dev \
         libgcrypt20-dev \
         libpopt-dev \
         gcc-mingw-w64 \
+        gcc \
         glib-2.0 \
         perl-base \
         uuid-dev \
@@ -52,7 +56,6 @@ RUN apt-get update && \
         xmlstarlet \
         gnutls-bin \
         xmltoman \
-        doxygen \
         xml-twig-tools \
         libxml2-dev \
     -yq && \
@@ -152,7 +155,7 @@ RUN chmod +x /usr/local/sbin/greenbone-certdata-sync && \
 
 RUN git clone https://github.com/SecureAuthCorp/impacket.git && \
     cd impacket/ && \
-    pip install . && \
+    pip3 install . && \
     cd ../ && \
     rm -rf impacket
 
@@ -166,6 +169,8 @@ COPY configs/openvas.conf /usr/local/etc/openvas/openvas.conf
 
 RUN mkdir reports && \
     chmod 777 reports && \
+    mkdir /var/run/ospd && \
+    chmod 777 /var/run/ospd && \
     chmod +x /usr/local/bin/start-services && \
     chmod +x /usr/local/bin/start-openvas && \
     chmod +x /usr/local/bin/start-scanner && \
@@ -175,8 +180,11 @@ RUN mkdir reports && \
     echo "net.core.somaxconn = 1024"  >> /etc/sysctl.conf && \
     echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
 
+
 RUN bash /configure-scanner && \
     rm -f /configure-scanner && \
     rm -rf /usr/local/var/log/gvm/*.log && \
+    rm -rf  /usr/local/var/run/feed-update.lock && \
     /etc/init.d/postgresql stop && \
-    /etc/init.d/redis-server stop
+    /etc/init.d/redis-server stop && \
+    chmod +777  /usr/local/var/lib/gvm/gvmd/report_formats

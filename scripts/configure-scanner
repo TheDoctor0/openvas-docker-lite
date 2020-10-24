@@ -7,6 +7,7 @@ sudo -u postgres createdb -O root gvmd && \
 sudo -u postgres psql gvmd -c 'create role dba with superuser noinherit;' && \
 sudo -u postgres psql gvmd -c 'grant dba to root;' && \
 sudo -u postgres psql gvmd -c 'create extension "uuid-ossp";'
+sudo -u postgres psql gvmd -c 'create extension "pgcrypto";'
 echo "Database created."
 
 echo "Creating certificates..."
@@ -17,6 +18,11 @@ echo "Creating user..."
 gvmd --create-user=admin --role=Admin
 gvmd --user=admin --new-password=admin
 echo "User created."
+
+echo "Set the Feed Import Owner..."
+user_uuid=$(gvmd --get-users --verbose | grep admin |awk '{print  $2 }')
+gvmd --modify-setting 78eceaec-3385-11ea-b237-28d24461215b --value $user_uuid
+echo "Feed Import Owner set"
 
 echo "Updating default scanner..."
 gvmd --modify-scanner=08b69003-5fc2-4037-a479-93b440211c73 of OpenVAS Default --scanner-host=/var/run/ospd/ospd.sock

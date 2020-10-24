@@ -1,12 +1,14 @@
 # OpenVAS Docker Lite [![License](https://img.shields.io/github/license/TheDoctor0/openvas-docker-lite)](https://github.com/TheDoctor0/openvas-docker-lite/blob/master/LICENSE) [![Build Status](https://travis-ci.org/TheDoctor0/openvas-docker-lite.png)](https://travis-ci.org/TheDoctor0/openvas-docker-lite) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/TheDoctor0/openvas-docker-lite/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/TheDoctor0/openvas-docker-lite/?branch=master) [![Docker Pulls](https://img.shields.io/docker/pulls/thedoctor0/openvas-docker-lite.svg)](https://hub.docker.com/r/thedoctor0/openvas-docker-lite)
 
-Docker container with automated OpenVAS 10 (GVMD 9) based on the Debian 10 image.
+Docker container with automated OpenVAS 20.08 (GVMD 20.08) based on the Debian 10 image.
 
 It contains custom automation script that allows to scan selected targets and generate a report with one command.
 
 This is a lite version and it does not include Greenbone Security Assistant - web app for managing OpenVAS.
 
-Older container based on Ubuntu with OpenVAS 9 is available [here](https://github.com/TheDoctor0/openvas-docker-lite/tree/9).
+Previous version with OpenVAS 10 is available [here](https://github.com/TheDoctor0/openvas-docker-lite/tree/10).
+
+Oldest container based on Ubuntu with OpenVAS 9 is available [here](https://github.com/TheDoctor0/openvas-docker-lite/tree/9).
 
 ## Usage
 
@@ -26,6 +28,11 @@ This will start up the container and update the NVTs cache - it can take some ti
 
 After that, the scan script will run and the progress will be displayed in the console.
 
+
+#### Target
+
+Target can be a single IP or CIDR or a comma separated list of IP addresses or CIDRs.
+
 #### Output
 
 It is possible to specify output filename with **-o** or **--output** argument.
@@ -35,19 +42,11 @@ By default report is saved as *openvas.report*.
 #### Formats
 
 1. Anonymous XML
-2. ARF
-3. CPE
-4. CSV Hosts
-5. CSV Results
-6. ITG
-7. LaTeX
-8. NBE
-9. PDF
-10. Topology SVG
-11. TXT
-12. Verinice ISM
-13. Verinice ITG
-14. XML
+2. CSV Results
+3. ITG
+4. PDF
+5. TXT
+6. XML
 
 You can select what report format will be used with **-f** or **--format** argument with one of the available profiles.
 
@@ -85,6 +84,17 @@ You can select scan alive tests by adding **-t** or **--tests** argument with on
 
 By default *ICMP, TCP-ACK Service & ARP Ping* alive tests are used.
 
+#### Port Lists
+
+1. All IANA Assigned TCP
+2. All IANA Assigned TCP and UDP
+3. All TCP and Nmap top 100 UDP
+
+You can select scan alive tests by adding **-P** or **--ports** argument with one of the available tests.
+
+By default *All TCP and Nmap top 100 UDP* port list is used.
+Note that using *All TCP and Nmap top 100 UDP* will significantly increase the scan time.
+
 #### Exclude Hosts
 
 You can exclude hosts from specified target by adding **-e** or **--exclude** argument with list of IPs.
@@ -120,3 +130,4 @@ Feeds update is quite slow, so it will take significantly more time.
 ## Credits
 - Mike Splain for creating the original OpenVAS docker image
 - ICTU team for creating the base automation script for OpenVAS
+- Eugene Merlinsky for adjusting the project to work with Greenbone 20.08
