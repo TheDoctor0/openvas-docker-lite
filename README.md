@@ -50,7 +50,7 @@ By default report is saved as *openvas.report*.
 
 You can select what report format will be used with **-f** or **--format** argument with one of the available profiles.
 
-By default *ARF* format is used to generate the report.
+By default *XML* format is used to generate the report.
 
 #### Profiles
 
