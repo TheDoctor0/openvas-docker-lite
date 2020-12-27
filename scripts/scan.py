@@ -152,7 +152,7 @@ def process_task(task_id: str) -> str:
 
             os.system("clear")
 
-            if progress > 0:
+            if status != "Done":
                 print("Task status: {} {}%".format(status, progress))
             else:
                 print("Task status: Complete")
