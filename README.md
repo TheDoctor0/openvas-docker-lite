@@ -54,14 +54,16 @@ By default *XML* format is used to generate the report.
 
 #### Profiles
 
-1. Discovery
-2. Empty
-3. Full and fast
-4. Full and fast ultimate
-5. Full and very deep
-6. Full and very deep ultimate
-7. Host Discovery
-8. System Discovery
+1. Base
+2. Discovery
+3. Empty
+4. Full and fast
+5. Host Discovery
+6. System Discovery
+7. GaussDB 100 V300R001C00 Security Hardening Guide (Standalone)
+8. EulerOS Linux Security Configuration
+9. Huawei Datacom Product Security Configuration Audit Guide
+10. IT-Grundschutz
 
 You can select scan profile by adding **-p** or **--profile** argument with one of the available profiles.
 

@@ -17,14 +17,16 @@ from typing import IO
 DEBUG: bool = False
 
 scan_profiles: Dict[str, str] = {
+    "Base": "d21f6c81-2b88-4ac1-b7b4-a2a9f2ad4663",
     "Discovery": "8715c877-47a0-438d-98a3-27c7a6ab2196",
     "Empty": "085569ce-73ed-11df-83c3-002264764cea",
     "Full and fast": "daba56c8-73ec-11df-a475-002264764cea",
-    "Full and fast ultimate": "698f691e-7489-11df-9d8c-002264764cea",
-    "Full and very deep": "708f25c4-7489-11df-8094-002264764cea",
-    "Full and very deep ultimate": "74db13d6-7489-11df-91b9-002264764cea",
     "Host Discovery": "2d3f051c-55ba-11e3-bf43-406186ea4fc5",
-    "System Discovery": "bbca7412-a950-11e3-9109-406186ea4fc5"
+    "System Discovery": "bbca7412-a950-11e3-9109-406186ea4fc5",
+    "GaussDB 100 V300R001C00 Security Hardening Guide (Standalone)": "61327f09-8a54-4854-9e1c-16798285fb28",
+    "EulerOS Linux Security Configuration": "9f822ad3-9208-4e02-ac03-78dce3ca9a23",
+    "Huawei Datacom Product Security Configuration Audit Guide": "aab5c4a1-eab1-4f4e-acac8c36d08de6bc",
+    "IT-Grundschutz": "c4b7c0cb-6502-4809-b034-8e635311b3e6"
 }
 
 report_formats: Dict[str, str] = {
