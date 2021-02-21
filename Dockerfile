@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils && \
         python3-pip \
         python3-dev \
         rsync \
+        rustc \
         nmap \
         snmp \
         sudo \
